@@ -1,0 +1,106 @@
+import cursor as cursor
+import pymysql
+from app import app
+from db_config import mysql
+from flask import jsonify
+from flask import flash, request
+from werkzeug.security import generate_password_hash, check_password_hash
+
+@app.route('/sintetico')
+def users():
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        cursor.execute("SELECT id, linha_turno as centro_de_trabalho, cod_produto, descricao_produto, turno, programado_linha as meta_hora, (programado_linha)*7.33 as programado_linha, cod_ordem, valor_temp, manual, refugo, ((valor_temp+manual)*multiplos)-refugo as producao_total, status, multiplos, empresa, data_inicio, data_final, hora_inicio, hora_final, tipo FROM view_total_hist WHERE empresa = '00153282000167' AND data_inicio = CURRENT_DATE() ORDER BY data_inicio DESC, linha_turno ASC")
+        rows = cursor.fetchall()
+        resp = jsonify(rows)
+        resp.status_code = 200
+        return resp
+    except Exception as e:
+        print(e)
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@app.route('/conan')
+def conan():
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        cursor.execute("SELECT id, tim, MAC, di0, di1, di2, di3, di4, di5, di6, di7, di8, di9, di10, di11 FROM conan")
+        rows = cursor.fetchall()
+        resp = jsonify(rows)
+        resp.status_code = 200
+        return resp
+    except Exception as e:
+        print(e)
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route('/post', methods=['POST'])
+def post():
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        _tim = request.json['tim']
+        _MAC = request.json['MAC']
+        _di0 = request.json['di0']
+        _di1 = request.json['di1']
+        _di2 = request.json['di2']
+        _di3 = request.json['di3']
+        _di4 = request.json['di4']
+        _di5 = request.json['di5']
+        _di6 = request.json['di6']
+        _di7 = request.json['di7']
+        _di8 = request.json['di8']
+        _di9 = request.json['di9']
+        _di10 = request.json['di10']
+        _di11 = request.json['di11']
+        insert_user_cmd = """INSERT INTO conan (tim, MAC, di0, di1, di2, di3, di4, di5, di6, di7, di8, di9, di10, di11) 
+                           VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+        cursor.execute(insert_user_cmd, (_tim, _MAC, _di0, _di1, _di2, _di3, _di4, _di5, _di6, _di7, _di8, _di9, _di10, _di11))
+        conn.commit()
+        response = jsonify(message='Valor Inserido com Sucesso', id=cursor.lastrowid)
+        # response.data = cursor.lastrowid
+        response.status_code = 200
+    except Exception as e:
+        print(e)
+        response = jsonify('Erro Brabissimo')
+        response.status_code = 400
+    finally:
+        cursor.close()
+        conn.close()
+        return (response)
+
+@app.route('/sintetico_data/<string:data>')
+def user(data):
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        cursor.execute("SELECT id as id_smartgears, linha_turno as centro_de_trabalho, cod_produto, descricao_produto, turno, programado_linha as programado, cod_ordem as cod_ordem_sap, refugo, IF(status = 2, ((((hist+valor_temp)*multiplos)+manual)-refugo), ((((hist)*multiplos)+manual)-refugo)) as produzido, data_inicio as data FROM view_total_hist WHERE empresa = '00153282000167' AND data_inicio = %s ORDER BY data_inicio DESC, linha_turno ASC", data)
+        row = cursor.fetchone()
+        resp = jsonify(row)
+        resp.status_code = 200
+        return resp
+    except Exception as e:
+        print(e)
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@app.errorhandler(404)
+def not_found(error=None):
+    message = {
+        'status': 404,
+        'message': 'Not Found: ' + request.url,
+    }
+    resp = jsonify(message)
+    resp.status_code = 404
+    return resp
+
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0')

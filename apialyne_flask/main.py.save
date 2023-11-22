@@ -1,0 +1,169 @@
+import cursor as cursor
+import pymysql
+from app import app
+from db_config import mysql
+from flask import jsonify
+from flask import flash, request
+from werkzeug.security import generate_password_hash, check_password_hash
+
+@app.route('/sintetico_mallory')
+def users():
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        cursor.execute("SELECT id as id_smartgears, linha_turno as centro_de_trabalho, ((SELECT cad_empresa_linha.cod_linha FROM cad_empresa_linha WHERE cad_empresa_linha.id = view_total_hist.id_linha)) as centro_trabalho_sap, cod_produto, descricao_produto, turno, programado_linha as programado_hora, programado_linha*7.33 as programado_turno, cod_ordem as cod_ordem_sap, refugo, manual, valor_temp as automacao, (((valor_temp*multiplos)+manual)-refugo) as valor_boa, DATE_FORMAT(data_inicio, '%Y-%m-%d') as data, DATE_FORMAT(data_final, '%Y-%m-%d') as data_final, status, multiplos, tipo FROM view_total_hist WHERE empresa = '00153282000167' AND data_inicio BETWEEN NOW() - INTERVAL 7 DAY AND NOW() ORDER BY data_inicio DESC, linha_turno ASC")
+        rows = cursor.fetchall()
+        resp = jsonify(rows)
+        resp.status_code = 200
+        return resp
+    except Exception as e:
+        print(e)
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route('/analitico_mallory')
+def analitico():
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        cursor.execute("SELECT id as id_smartgears ,id_linha as id_centro_de_trabalho, (SELECT cod_linha FROM cad_empresa_linha WHERE id = id_linha) as centro_trabalho_sap, linha as centro_de_trabalho, DATE_FORMAT(tim, '%Y-%m-%d') as data, MAC as equipamento, valor FROM view_contagem_linhas_detail2 WHERE empresa = '00153282000167' AND tim BETWEEN NOW() - INTERVAL 15 MINUTE AND NOW() ORDER BY tim DESC")
+        rows = cursor.fetchall()
+        resp = jsonify(rows)
+        resp.status_code = 200
+        return resp
+    except Exception as e:
+        print(e)
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route('/resumo')
+def resumo():
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        cursor.execute("select ifnull((select sum(`total_auto`.`valor`) from `total_auto` where cast(`total_auto`.`tim` as date) = curdate() and `total_auto`.`identificador` = `cad_empresa_linha`.`di`),0) AS `auto`, ifnull((select sum(`apontamento_contagem`.`valor_contagem`) from `apontamento_contagem` where `apontamento_contagem`.`linha` = `cad_empresa_linha`.`id` and cast(`apontamento_contagem`.`data` as date) = curdate()),0) AS `manual`, ifnull((select sum(`apontamento_refugo`.`valor_refugo`) from `apontamento_refugo` where `apontamento_refugo`.`linha` = `cad_empresa_linha`.`id` and cast(`apontamento_refugo`.`data` as date) = curdate()),0) AS `refugo`, `cad_empresa_linha`.`linha` AS `linha`, `cad_empresa_linha`.`cod_linha` AS `cod_linha`, DATE_FORMAT((SELECT `total_auto`.`tim` FROM `total_auto` WHERE `total_auto`.`identificador` = `cad_empresa_linha`.`di` AND `total_auto`.`MAC` = `cad_empresa_linha`.`equip` ORDER BY `total_auto`.`tim` DESC limit 1),  '%Y-%m-%d %H:%i:%s') as tim, DATE_FORMAT(CURRENT_TIMESTAMP(), '%Y-%m-%d %H:%i:%s') as agora from `cad_empresa_linha` WHERE `cad_empresa_linha`.`empresa` = '00153282000167' AND `cad_empresa_linha`.`di` IS NOT NULL")
+        rows = cursor.fetchall()
+        resp = jsonify(rows)
+        resp.status_code = 200
+        return resp
+    except Exception as e:
+        print(e)
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route('/resumo_mallory')
+def resumo_mallory():
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        cursor.execute("SELECT id, DATE_FORMAT(tim, 1590964) FROM view_painel WHERE empresa = '00153282000167'")
+        rows = cursor.fetchall()
+        resp = jsonify(rows)
+        resp.status_code = 200
+        return resp
+    except Exception as e:
+        print(e)
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route('/automacao_mallory')
+def automacao():
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        cursor.execute("SELECT MAC as equipamento, DATE_FORMAT(tim, '%Y-%m-%d %H:%i:%s') as data, linha as centro_trabalho, identificador, valor FROM view_contagem_linhas_detail2 WHERE empresa = '00153282000167' AND tim BETWEEN LAST_VALUE(tim) - INTERVAL 15 MINUTE AND LAST_VALUE(tim) ORDER BY tim DESC LIMIT 900")
+        rows = cursor.fetchall()
+        resp = jsonify(rows)
+        resp.status_code = 200
+        return resp
+    except Exception as e:
+        print(e)
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route('/conan')
+def conan():
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        cursor.execute("SELECT id, tim, MAC, di0, di1, di2, di3, di4, di5, di6, di7, di8, di9, di10, di11 FROM conan")
+        rows = cursor.fetchall()
+        resp = jsonify(rows)
+        resp.status_code = 200
+        return resp
+    except Exception as e:
+        print(e)
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route('/post', methods=['POST'])
+def post():
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        _tim = request.json['tim']
+        _MAC = request.json['MAC']
+        _di0 = request.json['di0']
+        _di1 = request.json['di1']
+        _di2 = request.json['di2']
+        _di3 = request.json['di3']
+        _di4 = request.json['di4']
+        _di5 = request.json['di5']
+        _di6 = request.json['di6']
+        _di7 = request.json['di7']
+        _di8 = request.json['di8']
+        _di9 = request.json['di9']
+        _di10 = request.json['di10']
+        _di11 = request.json['di11']
+        insert_user_cmd = """INSERT INTO conan (tim, MAC, di0, di1, di2, di3, di4, di5, di6, di7, di8, di9, di10, di11) 
+                           VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+        cursor.execute(insert_user_cmd, (_tim, _MAC, _di0, _di1, _di2, _di3, _di4, _di5, _di6, _di7, _di8, _di9, _di10, _di11))
+        conn.commit()
+        response = jsonify(message='Valor Inserido com Sucesso', id=cursor.lastrowid)
+        # response.data = cursor.lastrowid
+        response.status_code = 200
+    except Exception as e:
+        print(e)
+        response = jsonify('Erro Brabissimo')
+        response.status_code = 400
+    finally:
+        cursor.close()
+        conn.close()
+        return (response)
+
+@app.route('/sintetico_data/<string:data>')
+def user(data):
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        cursor.execute("SELECT id as id_smartgears, linha_turno as centro_de_trabalho, cod_produto, descricao_produto, turno, programado_linha as programado, cod_ordem as cod_ordem_sap, refugo, IF(status = 2, ((((hist+valor_temp)*multiplos)+manual)-refugo), ((((hist)*multiplos)+manual)-refugo)) as produzido, data_inicio as data FROM view_total_hist WHERE empresa = '00153282000167' AND data_inicio = %s ORDER BY data_inicio DESC, linha_turno ASC", data)
+        row = cursor.fetchone()
+        resp = jsonify(row)
+        resp.status_code = 200
+        return resp
+    except Exception as e:
+        print(e)
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@app.errorhandler(404)
+def not_found(error=None):
+    message = {
+        'status': 404,
+        'message': 'Not Found: ' + request.url,
+    }
+    resp = jsonify(message)
+    resp.status_code = 404
+    return resp
+
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0')
