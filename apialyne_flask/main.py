@@ -1,7 +1,6 @@
 import cursor as cursor
-import pymysql
-from app import app
 from db_config import mysql
+from app import app
 from flask import jsonify
 from flask import flash, request
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -11,147 +10,149 @@ import xml.etree.ElementTree as ET
 import base64
 
 
-@app.route('/getFunc')
-def getFunc():
-    try:
-        conn = mysql.connect()
-        cursor = conn.cursor(pymysql.cursors.DictCursor)
-        cursor.execute("SELECT id, codigo, nome, cargo FROM funcionarios")
-        rows = cursor.fetchall()
-        resp = jsonify(rows)
-        resp.status_code = 200
-        return resp
-    except Exception as e:
-        print(e)
-    finally:
-        cursor.close()
-        conn.close()
-
 @app.route('/getHWAuto')
 def getHWAuto():
     try:
-        conn = mysql.connect()
-        cursor = conn.cursor(pymysql.cursors.DictCursor)
-        cursor.execute("SELECT cod_centro, centro, IFNULL(mac, '-') as mac, IFNULL(corrente1, 0) as corrente1, IFNULL(temperatura, '-') as temperatura,IFNULL(data_insert, CURRENT_TIMESTAMP()) as data_insert FROM view_auto_senai")
+        # ObtÃ©m uma conexÃ£o e cursor usando a extensÃ£o flask_mysqldb
+        conn = mysql.connection
+        cursor = conn.cursor()
+
+        # Ajusta a consulta SQL
+        query = """
+	SELECT id as id_smartgears, linha_turno as centro_de_trabalho,
+        ((SELECT cad_empresa_linha.cod_linha FROM cad_empresa_linha WHERE cad_empresa_linha.linha = sintetico_linha.linha) + 0) as cod_linha
+        FROM sintetico_linha
+        """
+
+        cursor.execute(query)
+
         rows = cursor.fetchall()
+
         resp = jsonify(rows)
         resp.status_code = 200
         return resp
     except Exception as e:
         print(e)
+        resp = jsonify(error='Erro ao obter dados sintÃ©ticos')
+        resp.status_code = 500
+        return resp
     finally:
         cursor.close()
-        conn.close()
 
 @app.route('/GetCentrosAuto')
-def getcentrosauto():
+def getCentrosAuto():
     try:
-        conn = mysql.connect()
-        cursor = conn.cursor(pymysql.cursors.DictCursor)
-        cursor.execute("SELECT cod_centro, centro, IFNULL(mac, '-') as mac, IFNULL(corrente1, 0) as corrente1, IFNULL(temperatura, '-') as temperatura, IFNULL(data_insert, CURRENT_TIMESTAMP()) as data_insert FROM view_auto_senai")
+        # ObtÃ©m uma conexÃ£o e cursor usando a extensÃ£o flask_mysqldb
+        conn = mysql.connection
+        cursor = conn.cursor()
+
+        # Ajusta a consulta SQL
+        query = """
+	SELECT cod_centro, centro, IFNULL(mac, '-') as mac, IFNULL(corrente1, 0) 
+	as corrente1, IFNULL(temperatura, '-') as temperatura, 
+	IFNULL(data_insert, CURRENT_TIMESTAMP()) as data_insert FROM view_auto_senai
+	"""
+
+        cursor.execute(query)
+
         rows = cursor.fetchall()
+
         resp = jsonify(rows)
         resp.status_code = 200
         return resp
     except Exception as e:
         print(e)
-    finally:
-        cursor.close()
-        conn.close()
-
-@app.route('/brindes')
-def getBrindes():
-    try:
-        conn = mysql.connect()
-        cursor = conn.cursor(pymysql.cursors.DictCursor)
-        cursor.execute("SELECT * FROM brindes")
-        rows = cursor.fetchall()
-        resp = jsonify(rows)
-        resp.status_code = 200
+        resp = jsonify(error='Erro ao obter dados sintÃ©ticos')
+        resp.status_code = 500
         return resp
-    except Exception as e:
-        print(e)
     finally:
         cursor.close()
-        conn.close()
 
-@app.route('/sortear', methods=['POST'])
-def sortear_brinde():
-    # Crie uma conexão e obtenha um cursor
-    conn = mysql.connect()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
-    
-    cursor.execute('SELECT * FROM brindes WHERE quantidade_disponivel > 0')
-    brindes_disponiveis = cursor.fetchall()
-
-    if not brindes_disponiveis:
-        cursor.close()
-        connection.close()
-        return jsonify({'message': 'Nenhum brinde disponível para sorteio'})
-
-    brinde_sorteado = random.choice(brindes_disponiveis)
-    cursor.execute('UPDATE brindes SET quantidade_disponivel = quantidade_disponivel - 1 WHERE id = %s', (brinde_sorteado['id'],))
-    conn.commit()
-    cursor.close()
-    conn.close()
-
-    return jsonify(brinde_sorteado)
-
-
-@app.route('/getIST')
+@app.route('/GetColetor')
 def getColetor():
     try:
-        conn = mysql.connect()
-        cursor = conn.cursor(pymysql.cursors.DictCursor)
-        cursor.execute("SELECT * FROM coletor_senai ORDER BY id DESC LIMIT 20")
+        # ObtÃ©m uma conexÃ£o e cursor usando a extensÃ£o flask_mysqldb
+        conn = mysql.connection
+        cursor = conn.cursor()
+
+        # Ajusta a consulta SQL
+        query = """
+	SELECT * FROM coletor_senai ORDER BY id DESC LIMIT 20
+	"""
+
+        cursor.execute(query)
+
         rows = cursor.fetchall()
+
         resp = jsonify(rows)
         resp.status_code = 200
         return resp
     except Exception as e:
         print(e)
+        resp = jsonify(error='Erro ao obter dados sintÃ©ticos')
+        resp.status_code = 500
+        return resp
     finally:
         cursor.close()
-        conn.close()
 
 @app.route('/getIST2')
-def getColetor2():
+def getIST2():
     try:
-        conn = mysql.connect()
-        cursor = conn.cursor(pymysql.cursors.DictCursor)
-        cursor.execute("SELECT * FROM coletor_senai2 ORDER BY id DESC LIMIT 20")
+        # ObtÃ©m uma conexÃ£o e cursor usando a extensÃ£o flask_mysqldb
+        conn = mysql.connection
+        cursor = conn.cursor()
+
+        # Ajusta a consulta SQL
+        query = """
+SELECT * FROM coletor_senai2 ORDER BY id DESC LIMIT 20
+	"""
+
+        cursor.execute(query)
+
         rows = cursor.fetchall()
+
         resp = jsonify(rows)
         resp.status_code = 200
         return resp
     except Exception as e:
         print(e)
+        resp = jsonify(error='Erro ao obter dados sintÃ©ticos')
+        resp.status_code = 500
+        return resp
     finally:
         cursor.close()
-        conn.close()
 
 @app.route('/getIST3')
-def getColetor3():
+def getIST3():
     try:
-        conn = mysql.connect()
-        cursor = conn.cursor(pymysql.cursors.DictCursor)
-        cursor.execute("SELECT * FROM auto_senai ORDER BY id DESC LIMIT 20")
+        # ObtÃ©m uma conexÃ£o e cursor usando a extensÃ£o flask_mysqldb
+        conn = mysql.connection
+        cursor = conn.cursor()
+
+        # Ajusta a consulta SQL
+        query = """
+	SELECT * FROM auto_senai ORDER BY id DESC LIMIT 20
+	"""
+
+        cursor.execute(query)
+
         rows = cursor.fetchall()
+
         resp = jsonify(rows)
         resp.status_code = 200
         return resp
     except Exception as e:
         print(e)
+        resp = jsonify(error='Erro ao obter dados sintÃ©ticos')
+        resp.status_code = 500
+        return resp
     finally:
         cursor.close()
-        conn.close()
-
 
 @app.route('/postIST2', methods=['POST'])
 def post2():
     try:
-        conn = mysql.connect()
-        cursor = conn.cursor()
+        cursor = mysql.connection.cursor()
         json_data = request.get_json(force=True)
         _mac = json_data['mac']
         _di0 = json_data['di0']
@@ -165,9 +166,8 @@ def post2():
         _data = json_data['data']
         insert_user_cmd = """INSERT INTO coletor_senai2 (mac, di0, di1, di2, di3, di4, di5, di6, di7, data) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
         cursor.execute(insert_user_cmd, (_mac, _di0, _di1, _di2, _di3, _di4, _di5, _di6, _di7, _data))
-        conn.commit()
+        mysql.connection.commit()
         response = jsonify(message='Valor Inserido com Sucesso', id=cursor.lastrowid)
-        # response.data = cursor.lastrowid
         response.status_code = 200
     except Exception as e:
         print(e)
@@ -175,14 +175,12 @@ def post2():
         response.status_code = 400
     finally:
         cursor.close()
-        conn.close()
-        return (response)
+        return response
 
 @app.route('/postIST3', methods=['POST'])
 def post3():
     try:
-        conn = mysql.connect()
-        cursor = conn.cursor()
+        cursor = mysql.connection.cursor()
         json_data = request.get_json(force=True)
         _mac = json_data['mac']
         _di0 = json_data['di0']
@@ -197,9 +195,8 @@ def post3():
         _tim = json_data['tim']
         insert_user_cmd = """INSERT INTO auto_senai (mac, di0, di1, di2, di3, peso, temperatura, corrente1, corrente2, corrente3, tim) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
         cursor.execute(insert_user_cmd, (_mac, _di0, _di1, _di2, _di3, _peso, _temperatura, _corrente1, _corrente2, _corrente3, _tim))
-        conn.commit()
+        mysql.connection.commit()
         response = jsonify(message='Valor Inserido com Sucesso', id=cursor.lastrowid)
-        # response.data = cursor.lastrowid
         response.status_code = 200
     except Exception as e:
         print(e)
@@ -207,39 +204,12 @@ def post3():
         response.status_code = 400
     finally:
         cursor.close()
-        conn.close()
-        return (response)
-
-@app.route('/postLead', methods=['POST'])
-def lead():
-    try:
-        conn = mysql.connect()
-        cursor = conn.cursor()
-        json_data = request.get_json(force=True)
-        _nome = json_data['nome']
-        _empresa = json_data['empresa']
-        _telefone = json_data['telefone']
-        _email = json_data['email']
-        insert_user_cmd = """INSERT INTO cad_leads (nome, empresa, telefone, email) VALUES (%s, %s, %s, %s)"""
-        cursor.execute(insert_user_cmd, (_nome, _empresa, _telefone, _email))
-        conn.commit()
-        response = jsonify(message='Valor Inserido com Sucesso', id=cursor.lastrowid)
-        # response.data = cursor.lastrowid
-        response.status_code = 200
-    except Exception as e:
-        print(e)
-        response = jsonify('Erro Brabissimo Senai')
-        response.status_code = 400
-    finally:
-        cursor.close()
-        conn.close()
-        return (response)
+        return response
 
 @app.route('/postParada', methods=['POST'])
 def parada():
     try:
-        conn = mysql.connect()
-        cursor = conn.cursor()
+        cursor = mysql.connection.cursor()
         json_data = request.get_json(force=True)
         _cod_centro = json_data['cod_centro']
         _cod_ordem = json_data['cod_ordem']
@@ -249,9 +219,8 @@ def parada():
         _etapa = json_data['etapa']
         insert_user_cmd = """INSERT INTO alerta_parada (cod_centro, cod_ordem, operador, motivo, tim, etapa) VALUES (%s, %s, %s, %s, %s, %s)"""
         cursor.execute(insert_user_cmd, (_cod_centro, _cod_ordem, _operador, _motivo, _tim, _etapa))
-        conn.commit()
+        mysql.connection.commit()
         response = jsonify(message='Valor Inserido com Sucesso', id=cursor.lastrowid)
-        # response.data = cursor.lastrowid
         response.status_code = 200
     except Exception as e:
         print(e)
@@ -259,14 +228,12 @@ def parada():
         response.status_code = 400
     finally:
         cursor.close()
-        conn.close()
-        return (response)
+        return response
 
 @app.route('/postIST', methods=['POST'])
 def post():
     try:
-        conn = mysql.connect()
-        cursor = conn.cursor()
+        cursor = mysql.connection.cursor()
         json_data = request.get_json(force=True)
         _mac = json_data['mac']
         _identificador = json_data['identificador']
@@ -274,9 +241,8 @@ def post():
         _data = json_data['data']
         insert_user_cmd = """INSERT INTO coletor_senai (mac, identificador, valor, data) VALUES (%s, %s, %s, %s)"""
         cursor.execute(insert_user_cmd, (_mac, _identificador, _valor, _data))
-        conn.commit()
+        mysql.connection.commit()
         response = jsonify(message='Valor Inserido com Sucesso', id=cursor.lastrowid)
-        # response.data = cursor.lastrowid
         response.status_code = 200
     except Exception as e:
         print(e)
@@ -284,46 +250,11 @@ def post():
         response.status_code = 400
     finally:
         cursor.close()
-        conn.close()
-        return (response)
-
-@app.route('/sintetico_data/<string:data>')
-def user(data):
-    try:
-        conn = mysql.connect()
-        cursor = conn.cursor(pymysql.cursors.DictCursor)
-        cursor.execute("SELECT id as id_SMARTgears, linha_turno as centro_de_trabalho, cod_produto, descricao_produto, turno, programado_linha as programado, cod_ordem as cod_ordem_sap, refugo, IF(status = 2, ((((hist+valor_temp)*multiplos)+manual)-refugo), ((((hist)*multiplos)+manual)-refugo)) as produzido, data_inicio as data FROM view_total_hist WHERE empresa = '00153282000167' AND data_inicio = %s ORDER BY data_inicio DESC, linha_turno ASC", data)
-        row = cursor.fetchone()
-        resp = jsonify(row)
-        resp.status_code = 200
-        return resp
-    except Exception as e:
-        print(e)
-    finally:
-        cursor.close()
-        conn.close()
-
-@app.route('/detalhe/<string:data>')
-def detalhe(data):
-    try:
-        conn = mysql.connect()
-        cursor = conn.cursor(pymysql.cursors.DictCursor)
-        cursor.execute("SELECT `view_total_hist`.`id` AS `id`, `view_total_hist`.`cod_ordem` AS `cod_ordem`, `view_total_hist`.`id_linha` AS `id_linha`, `view_total_hist`.`linha_turno` AS `linha_turno`, `view_total_hist`.`cod_produto` AS `cod_produto`, `view_total_hist`.`descricao_produto` AS `desc_produto`, `view_total_hist`.`programado_linha` AS `meta_hora`, round(`view_total_hist`.`programado_linha` * 7.33,0) AS `meta_total`, `view_total_hist`.`valor_temp` AS `valor_temp`, `view_total_hist`.`manual` AS `manual`, `view_total_hist`.`refugo` AS `refugo`, (SELECT tipo FROM status_ordem WHERE id = `view_total_hist`.`status`) as `status`, `view_total_hist`.`empresa` AS `empresa`, ((`view_total_hist`.`valor_temp` + `view_total_hist`.`manual`) * `view_total_hist`.`multiplos` - `view_total_hist`.`refugo`) as total, IF((timestampdiff(HOUR,(select `mudanca_status_meta`.`data` from `mudanca_status_meta` where `mudanca_status_meta`.`id_meta` = `view_total_hist`.`id` and `mudanca_status_meta`.`id_status` = 2 order by `mudanca_status_meta`.`id` limit 1),current_timestamp())) = 0 ,1, (timestampdiff(HOUR,(select `mudanca_status_meta`.`data` from `mudanca_status_meta` where `mudanca_status_meta`.`id_meta` = `view_total_hist`.`id` and `mudanca_status_meta`.`id_status` = 2 order by `mudanca_status_meta`.`id` limit 1),current_timestamp()))) as fer, (((`view_total_hist`.`valor_temp` + `view_total_hist`.`manual`) * `view_total_hist`.`multiplos` - `view_total_hist`.`refugo`)/(if(current_timestamp() > concat(`view_total_hist`.`data_final`,' ',(select `cad_turno`.`hora_fim` from `cad_turno` where `cad_turno`.`turno` = `view_total_hist`.`turno` and `cad_turno`.`empresa` = `view_total_hist`.`empresa`)),round(`view_total_hist`.`programado_linha` * 7.33,0),round(`view_total_hist`.`programado_linha` * IF((timestampdiff(HOUR,(select `mudanca_status_meta`.`data` from `mudanca_status_meta` where `mudanca_status_meta`.`id_meta` = `view_total_hist`.`id` and `mudanca_status_meta`.`id_status` = 2 order by `mudanca_status_meta`.`id` limit 1),current_timestamp())) = 0 ,1, (timestampdiff(HOUR,(select `mudanca_status_meta`.`data` from `mudanca_status_meta` where `mudanca_status_meta`.`id_meta` = `view_total_hist`.`id` and `mudanca_status_meta`.`id_status` = 2 order by `mudanca_status_meta`.`id` limit 1),current_timestamp()))),0))))as performance, IFNULL((if(`view_total_hist`.`valor_temp` + `view_total_hist`.`manual` + `view_total_hist`.`hist` - `view_total_hist`.`refugo` = 0,(`view_total_hist`.`valor_temp` + `view_total_hist`.`manual` + `view_total_hist`.`hist` - `view_total_hist`.`refugo`) / 1 * 100,(`view_total_hist`.`valor_temp` + `view_total_hist`.`manual` + `view_total_hist`.`hist` - `view_total_hist`.`refugo`) / (`view_total_hist`.`valor_temp` + `view_total_hist`.`manual` + `view_total_hist`.`hist`))),0) AS `qualidade`, 1 as disponibilidade from `view_total_hist` WHERE (`view_total_hist`.`data_inicio` = CURRENT_DATE() OR `view_total_hist`.`data_final` = CURRENT_DATE()) AND id_linha = %s AND `view_total_hist`.`status` = 2 ORDER BY hora_inicio DESC LIMIT 1", data)
-        row = cursor.fetchone()
-        resp = jsonify(row)
-        resp.status_code = 200
-        return resp
-    except Exception as e:
-        print(e)
-    finally:
-        cursor.close()
-        conn.close()
-
-
+        return response
 
 @app.route('/centros_trabalho', methods=['GET'])
 def get_centros_trabalho():
-    # Configuração da primeira solicitação HTTP
+    # ConfiguraÃ§Ã£o da primeira solicitaÃ§Ã£o HTTP
     login_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {"Content-Type": "application/json"}
     payload = {
@@ -345,7 +276,7 @@ def get_centros_trabalho():
         cookie = response.headers['set-cookie'].split(';')[0]
         jsessionid = cookie
 
-        # Configuração da segunda solicitação usando o cookie da primeira API
+        # ConfiguraÃ§Ã£o da segunda solicitaÃ§Ã£o usando o cookie da primeira API
         segunda_api_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json"
         segunda_api_headers = {
             "Content-Type": "application/json",
@@ -371,7 +302,7 @@ def get_centros_trabalho():
 
 @app.route('/ordem_producao', methods=['GET'])
 def get_ordem_producao():
-    # Configuração da primeira solicitação HTTP
+    # ConfiguraÃ§Ã£o da primeira solicitaÃ§Ã£o HTTP
     login_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {"Content-Type": "application/json"}
     payload = {
@@ -393,7 +324,7 @@ def get_ordem_producao():
         cookie = response.headers['set-cookie'].split(';')[0]
         jsessionid = cookie
 
-        # Configuração da segunda solicitação usando o cookie da primeira API
+        # ConfiguraÃ§Ã£o da segunda solicitaÃ§Ã£o usando o cookie da primeira API
         segunda_api_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json"
         segunda_api_headers = {
             "Content-Type": "application/json",
@@ -419,7 +350,7 @@ def get_ordem_producao():
     
 @app.route('/materia_prima', methods=['GET'])
 def get_materia_prima():
-    # Configuração da primeira solicitação HTTP
+    # ConfiguraÃ§Ã£o da primeira solicitaÃ§Ã£o HTTP
     login_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {"Content-Type": "application/json"}
     payload = {
@@ -441,7 +372,7 @@ def get_materia_prima():
         cookie = response.headers['set-cookie'].split(';')[0]
         jsessionid = cookie
 
-        # Configuração da segunda solicitação usando o cookie da primeira API
+        # ConfiguraÃ§Ã£o da segunda solicitaÃ§Ã£o usando o cookie da primeira API
         segunda_api_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json"
         segunda_api_headers = {
             "Content-Type": "application/json",
@@ -467,7 +398,7 @@ def get_materia_prima():
 
 @app.route('/produto', methods=['GET'])
 def get_produto():
-    # Configuração da primeira solicitação HTTP
+    # ConfiguraÃ§Ã£o da primeira solicitaÃ§Ã£o HTTP
     login_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {"Content-Type": "application/json"}
     payload = {
@@ -489,7 +420,7 @@ def get_produto():
         cookie = response.headers['set-cookie'].split(';')[0]
         jsessionid = cookie
 
-        # Configuração da segunda solicitação usando o cookie da primeira API
+        # ConfiguraÃ§Ã£o da segunda solicitaÃ§Ã£o usando o cookie da primeira API
         segunda_api_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json"
         segunda_api_headers = {
             "Content-Type": "application/json",
@@ -519,9 +450,9 @@ def get_funcionarios():
     matricula = request.args.get('matricula')
 
     if matricula is None:
-        return jsonify({"error": "O parâmetro 'matricula' é obrigatório"}), 400
+        return jsonify({"error": "O parÃ¢metro 'matricula' Ã© obrigatÃ³rio"}), 400
 
-    # Configuração da primeira solicitação HTTP
+    # ConfiguraÃ§Ã£o da primeira solicitaÃ§Ã£o HTTP
     login_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {"Content-Type": "application/json"}
     payload = {
@@ -543,7 +474,7 @@ def get_funcionarios():
         cookie = response.headers['set-cookie'].split(';')[0]
         jsessionid = cookie
 
-        # Configuração da segunda solicitação usando o cookie da primeira API
+        # ConfiguraÃ§Ã£o da segunda solicitaÃ§Ã£o usando o cookie da primeira API
         segunda_api_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json"
         segunda_api_headers = {
             "Content-Type": "application/json",
@@ -565,11 +496,16 @@ def get_funcionarios():
 
     except Exception as e:
         return jsonify({"error": "Erro ao acessar as APIs"}), 500
-    
 
-@app.route('/motivo_paradas', methods=['GET'])
-def get_motivo_paradas():
-    # Configuração da primeira solicitação HTTP
+@app.route('/apontamentos', methods=['GET'])
+def get_apontamentos():
+
+    idiatv = request.args.get('idiatv')
+
+    if idiatv is None:
+        return jsonify({"error": "O parÃ¢metro 'idiatv' Ã© obrigatÃ³rio"}), 400
+
+    # ConfiguraÃ§Ã£o da primeira solicitaÃ§Ã£o HTTP
     login_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {"Content-Type": "application/json"}
     payload = {
@@ -591,7 +527,55 @@ def get_motivo_paradas():
         cookie = response.headers['set-cookie'].split(';')[0]
         jsessionid = cookie
 
-        # Configuração da segunda solicitação usando o cookie da primeira API
+        # ConfiguraÃ§Ã£o da segunda solicitaÃ§Ã£o usando o cookie da primeira API
+        segunda_api_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json"
+        segunda_api_headers = {
+            "Content-Type": "application/json",
+            "Cookie": jsessionid
+        }
+        segunda_api_payload = {
+            "serviceName": "DbExplorerSP.executeQuery",
+            "requestBody": {
+                "sql": "Select APO.NUAPO, APA.SEQAPA, isnull(APO.SITUACAO,'') from TPRAPO APO left join TPRAPA APA ON APA.NUAPO = APO.NUAPO WHERE IDIATV = %s AND SITUACAO = 'P'" % idiatv
+            }
+        }
+
+        response2 = requests.post(segunda_api_url, json=segunda_api_payload, headers=segunda_api_headers)
+
+        if response2.status_code == 200:
+            return response2.json()  # Retorna a resposta da segunda API
+        else:
+            return jsonify({"error": "Erro ao acessar a segunda API"}), 500
+
+    except Exception as e:
+        return jsonify({"error": "Erro ao acessar as APIs"}), 500
+    
+
+@app.route('/motivo_paradas', methods=['GET'])
+def get_motivo_paradas():
+    # ConfiguraÃ§Ã£o da primeira solicitaÃ§Ã£o HTTP
+    login_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
+    headers = {"Content-Type": "application/json"}
+    payload = {
+        "serviceName": "MobileLoginSP.login",
+        "requestBody": {
+            "NOMUSU": { "$": "IRANILDO" },
+            "INTERNO": { "$": "123456" },
+            "KEEPCONNECTED": { "$": "S" }
+        }
+    }
+
+    try:
+        response = requests.post(login_url, json=payload, headers=headers)
+
+        if response.status_code != 200:
+            return jsonify({"error": "Erro ao acessar a primeira API"}), 500
+
+        # Extrai o cookie JSESSIONID da resposta
+        cookie = response.headers['set-cookie'].split(';')[0]
+        jsessionid = cookie
+
+        # ConfiguraÃ§Ã£o da segunda solicitaÃ§Ã£o usando o cookie da primeira API
         segunda_api_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json"
         segunda_api_headers = {
             "Content-Type": "application/json",
@@ -618,7 +602,7 @@ def get_motivo_paradas():
 @app.route('/fluxo', methods=['GET'])
 def get_fluxo():
     codprod = request.args.get('codprod')
-    # Configuração da primeira solicitação HTTP
+    # ConfiguraÃ§Ã£o da primeira solicitaÃ§Ã£o HTTP
     login_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {"Content-Type": "application/json"}
     payload = {
@@ -640,7 +624,7 @@ def get_fluxo():
         cookie = response.headers['set-cookie'].split(';')[0]
         jsessionid = cookie
 
-        # Configuração da segunda solicitação usando o cookie da primeira API
+        # ConfiguraÃ§Ã£o da segunda solicitaÃ§Ã£o usando o cookie da primeira API
         segunda_api_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json"
         segunda_api_headers = {
             "Content-Type": "application/json",
@@ -672,8 +656,8 @@ def get_fluxo_detail():
     codprod = request.args.get('codprod')
 
     if codseq is None:
-        return jsonify({"error": "O parâmetro 'codseq' é obrigatório"}), 400
-    # Configuração da primeira solicitação HTTP
+        return jsonify({"error": "O parÃ¢metro 'codseq' Ã© obrigatÃ³rio"}), 400
+    # ConfiguraÃ§Ã£o da primeira solicitaÃ§Ã£o HTTP
     login_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {"Content-Type": "application/json"}
     payload = {
@@ -695,7 +679,7 @@ def get_fluxo_detail():
         cookie = response.headers['set-cookie'].split(';')[0]
         jsessionid = cookie
 
-        # Configuração da segunda solicitação usando o cookie da primeira API
+        # ConfiguraÃ§Ã£o da segunda solicitaÃ§Ã£o usando o cookie da primeira API
         segunda_api_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json"
         segunda_api_headers = {
             "Content-Type": "application/json",
@@ -726,8 +710,8 @@ def get_ordem_producao_detail():
     codordem = request.args.get('codordem')
 
     if codordem is None:
-        return jsonify({"error": "O parâmetro 'codcentro' é obrigatório"}), 400
-    # Configuração da primeira solicitação HTTP
+        return jsonify({"error": "O parÃ¢metro 'codcentro' Ã© obrigatÃ³rio"}), 400
+    # ConfiguraÃ§Ã£o da primeira solicitaÃ§Ã£o HTTP
     login_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {"Content-Type": "application/json"}
     payload = {
@@ -749,7 +733,7 @@ def get_ordem_producao_detail():
         cookie = response.headers['set-cookie'].split(';')[0]
         jsessionid = cookie
 
-        # Configuração da segunda solicitação usando o cookie da primeira API
+        # ConfiguraÃ§Ã£o da segunda solicitaÃ§Ã£o usando o cookie da primeira API
         segunda_api_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json"
         segunda_api_headers = {
             "Content-Type": "application/json",
@@ -778,8 +762,8 @@ def get_ordem_producao_centro():
     centro = request.args.get('centro')
 
     if centro is None:
-        return jsonify({"error": "O parâmetro 'centro' é obrigatório"}), 400
-    # Configuração da primeira solicitação HTTP
+        return jsonify({"error": "O parÃ¢metro 'centro' Ã© obrigatÃ³rio"}), 400
+    # ConfiguraÃ§Ã£o da primeira solicitaÃ§Ã£o HTTP
     login_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {"Content-Type": "application/json"}
     payload = {
@@ -801,7 +785,7 @@ def get_ordem_producao_centro():
         cookie = response.headers['set-cookie'].split(';')[0]
         jsessionid = cookie
 
-        # Configuração da segunda solicitação usando o cookie da primeira API
+        # ConfiguraÃ§Ã£o da segunda solicitaÃ§Ã£o usando o cookie da primeira API
         segunda_api_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json"
         segunda_api_headers = {
             "Content-Type": "application/json",
@@ -838,13 +822,13 @@ def extract_info_from_xml(xml_text):
 # Rota para a primeira consulta
 @app.route('/post_continuar_op', methods=['GET'])
 def post_continuar_op():
-    # Obtendo o parâmetro da URL para a tag IDIATV
+    # Obtendo o parÃ¢metro da URL para a tag IDIATV
     idiatv_param = request.args.get('idiatv')
 
     url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {'Content-Type': 'application/json'}
 
-    # Corpo da requisição
+    # Corpo da requisiÃ§Ã£o
     body = {
         "serviceName": "MobileLoginSP.login",
         "requestBody": {
@@ -854,7 +838,7 @@ def post_continuar_op():
         }
     }
 
-    # Fazendo a requisição
+    # Fazendo a requisiÃ§Ã£o
     response = requests.post(url, json=body, headers=headers)
     
     # Obtendo o jsessionid da resposta
@@ -863,7 +847,7 @@ def post_continuar_op():
     # Realizando o segundo POST
     url_post = f"http://179.185.45.146:8280/mgeprod/service.sbr?serviceName=OperacaoProducaoSP.continuarInstanciaAtividades&application=OperacaoProducao&mgeSession={jsessionid}&resourceID=br.com.sankhya.producao.cad.OperacaoProducao"
 
-    # Corpo da segunda requisição com o parâmetro da URL
+    # Corpo da segunda requisiÃ§Ã£o com o parÃ¢metro da URL
     body_post = f"""
     <serviceRequest serviceName="OperacaoProducaoSP.continuarInstanciaAtividades">
         <requestBody>
@@ -879,7 +863,7 @@ def post_continuar_op():
     # Fazendo o segundo POST
     response_post = requests.post(url_post, data=body_post, headers={'Content-Type': 'application/xml'})
 
-    # Extraindo informações do XML retornado
+    # Extraindo informaÃ§Ãµes do XML retornado
     info_from_xml = extract_info_from_xml(response_post.text)
 
     return jsonify(info_from_xml)
@@ -887,13 +871,13 @@ def post_continuar_op():
 
 @app.route('/post_iniciarop', methods=['GET'])
 def post_iniciarop():
-    # Obtendo o parâmetro da URL para a tag IDIATV
+    # Obtendo o parÃ¢metro da URL para a tag IDIATV
     idiatv_param = request.args.get('idiatv', default='1')
 
     url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {'Content-Type': 'application/json'}
 
-    # Corpo da requisição
+    # Corpo da requisiÃ§Ã£o
     body = {
         "serviceName": "MobileLoginSP.login",
         "requestBody": {
@@ -903,7 +887,7 @@ def post_iniciarop():
         }
     }
 
-    # Fazendo a requisição
+    # Fazendo a requisiÃ§Ã£o
     response = requests.post(url, json=body, headers=headers)
     
     # Obtendo o jsessionid da resposta
@@ -912,7 +896,7 @@ def post_iniciarop():
     # Realizando o segundo POST
     url_post = f"http://179.185.45.146:8280/mgeprod/service.sbr?serviceName=OperacaoProducaoSP.iniciarInstanciaAtividades&application=OperacaoProducao&mgeSession={jsessionid}&resourceID=br.com.sankhya.producao.cad.OperacaoProducao"
 
-    # Corpo da segunda requisição com o parâmetro da URL
+    # Corpo da segunda requisiÃ§Ã£o com o parÃ¢metro da URL
     body_post = f"""
     <serviceRequest serviceName="OperacaoProducaoSP.iniciarInstanciaAtividades">
         <requestBody>
@@ -928,7 +912,7 @@ def post_iniciarop():
     # Fazendo o segundo POST
     response_post = requests.post(url_post, data=body_post, headers={'Content-Type': 'application/xml'})
 
-    # Extraindo informações do XML retornado
+    # Extraindo informaÃ§Ãµes do XML retornado
     info_from_xml = extract_info_from_xml(response_post.text)
 
     return jsonify(info_from_xml)
@@ -936,14 +920,14 @@ def post_iniciarop():
 
 @app.route('/post_parar_maquina', methods=['GET'])
 def post_parar_maquina():
-    # Obtendo o parâmetro da URL para a tag IDIATV
+    # Obtendo o parÃ¢metro da URL para a tag IDIATV
     idiatv_param = request.args.get('idiatv')
     codmtp_param = request.args.get('codmtp')
 
     url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {'Content-Type': 'application/json'}
 
-    # Corpo da requisição
+    # Corpo da requisiÃ§Ã£o
     body = {
         "serviceName": "MobileLoginSP.login",
         "requestBody": {
@@ -953,7 +937,7 @@ def post_parar_maquina():
         }
     }
 
-    # Fazendo a requisição
+    # Fazendo a requisiÃ§Ã£o
     response = requests.post(url, json=body, headers=headers)
     
     # Obtendo o jsessionid da resposta
@@ -962,7 +946,7 @@ def post_parar_maquina():
     # Realizando o segundo POST
     url_post = f"http://179.185.45.146:8280/mgeprod/service.sbr?application=OperacaoProducao&mgeSession={jsessionid}&serviceName=OperacaoProducaoSP.pararInstanciaAtividades"
 
-    # Corpo da segunda requisição com o parâmetro da URL
+    # Corpo da segunda requisiÃ§Ã£o com o parÃ¢metro da URL
     body_post = f"""
     <serviceRequest serviceName="OperacaoProducaoSP.pararInstanciaAtividades">
     <requestBody>
@@ -980,14 +964,14 @@ def post_parar_maquina():
     # Fazendo o segundo POST
     response_post = requests.post(url_post, data=body_post, headers={'Content-Type': 'application/xml'})
 
-    # Extraindo informações do XML retornado
+    # Extraindo informaÃ§Ãµes do XML retornado
     info_from_xml = extract_info_from_xml(response_post.text)
 
     return jsonify(info_from_xml)
 
 @app.route('/post_finalizarop', methods=['GET'])
 def post_finalizarop():
-    # Obtendo o parâmetro da URL para a tag IDIATV
+    # Obtendo o parÃ¢metro da URL para a tag IDIATV
     idiatv_param = request.args.get('idiatv')
     idefx_param = request.args.get('idefx')
     idiproc_param = request.args.get('idiproc')
@@ -996,7 +980,7 @@ def post_finalizarop():
     url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {'Content-Type': 'application/json'}
 
-    # Corpo da requisição
+    # Corpo da requisiÃ§Ã£o
     body = {
         "serviceName": "MobileLoginSP.login",
         "requestBody": {
@@ -1006,7 +990,7 @@ def post_finalizarop():
         }
     }
 
-    # Fazendo a requisição
+    # Fazendo a requisiÃ§Ã£o
     response = requests.post(url, json=body, headers=headers)
     
     # Obtendo o jsessionid da resposta
@@ -1015,7 +999,7 @@ def post_finalizarop():
     # Realizando o segundo POST
     url_post = f"http://179.185.45.146:8280/mgeprod/service.sbr?serviceName=OperacaoProducaoSP.finalizarInstanciaAtividades&mgeSession={jsessionid}"
 
-    # Corpo da segunda requisição com o parâmetro da URL
+    # Corpo da segunda requisiÃ§Ã£o com o parÃ¢metro da URL
     body_post = f"""
     <serviceRequest serviceName="OperacaoProducaoSP.finalizarInstanciaAtividades">
     <requestBody>
@@ -1034,14 +1018,14 @@ def post_finalizarop():
     # Fazendo o segundo POST
     response_post = requests.post(url_post, data=body_post, headers={'Content-Type': 'application/xml'})
 
-    # Extraindo informações do XML retornado
+    # Extraindo informaÃ§Ãµes do XML retornado
     info_from_xml = extract_info_from_xml(response_post.text)
 
     return jsonify(info_from_xml)
 
 @app.route('/post_realocacentro', methods=['GET'])
 def post_realocacentro():
-    # Obtendo o parâmetro da URL para a tag IDIATV
+    # Obtendo o parÃ¢metro da URL para a tag IDIATV
     idiatv_param = request.args.get('idiatv')
     idiproc_param = request.args.get('idiproc')
     codwcp_param = request.args.get('codwcp')
@@ -1049,7 +1033,7 @@ def post_realocacentro():
     url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {'Content-Type': 'application/json'}
 
-    # Corpo da requisição
+    # Corpo da requisiÃ§Ã£o
     body = {
         "serviceName": "MobileLoginSP.login",
         "requestBody": {
@@ -1059,7 +1043,7 @@ def post_realocacentro():
         }
     }
 
-    # Fazendo a requisição
+    # Fazendo a requisiÃ§Ã£o
     response = requests.post(url, json=body, headers=headers)
     
     # Obtendo o jsessionid da resposta
@@ -1068,7 +1052,7 @@ def post_realocacentro():
     # Realizando o segundo POST
     url_post = f"http://179.185.45.146:8280/mgeprod/service.sbr?application=OperacaoProducao&mgeSession={jsessionid}&serviceName=OperacaoProducaoSP.realocarCentroDeTrabalhoPorCategoria"
 
-    # Corpo da segunda requisição com o parâmetro da URL
+    # Corpo da segunda requisiÃ§Ã£o com o parÃ¢metro da URL
     body_post = f"""
         <serviceRequest serviceName="OperacaoProducaoSP.realocarCentroDeTrabalhoPorCategoria">
             <requestBody>
@@ -1080,7 +1064,7 @@ def post_realocacentro():
     # Fazendo o segundo POST
     response_post = requests.post(url_post, data=body_post, headers={'Content-Type': 'application/xml'})
 
-    # Extraindo informações do XML retornado
+    # Extraindo informaÃ§Ãµes do XML retornado
     info_from_xml = extract_info_from_xml(response_post.text)
 
     return jsonify(info_from_xml)
@@ -1088,13 +1072,13 @@ def post_realocacentro():
 
 @app.route('/post_criaapontamento', methods=['GET'])
 def post_criaapontamento():
-    # Obtendo o parâmetro da URL para a tag IDIATV
+    # Obtendo o parÃ¢metro da URL para a tag IDIATV
     idiatv_param = request.args.get('idiatv')
 
     url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {'Content-Type': 'application/json'}
 
-    # Corpo da requisição
+    # Corpo da requisiÃ§Ã£o
     body = {
         "serviceName": "MobileLoginSP.login",
         "requestBody": {
@@ -1104,7 +1088,7 @@ def post_criaapontamento():
         }
     }
 
-    # Fazendo a requisição
+    # Fazendo a requisiÃ§Ã£o
     response = requests.post(url, json=body, headers=headers)
     
     # Obtendo o jsessionid da resposta
@@ -1113,7 +1097,7 @@ def post_criaapontamento():
     # Realizando o segundo POST
     url_post = f"http://179.185.45.146:8280/mgeprod/service.sbr?serviceName=OperacaoProducaoSP.criarApontamento&application=OperacaoProducao&mgeSession={jsessionid}&resourceID=br.com.sankhya.producao.cad.OperacaoProducao"
 
-    # Corpo da segunda requisição com o parâmetro da URL
+    # Corpo da segunda requisiÃ§Ã£o com o parÃ¢metro da URL
     body_post = f"""
     <serviceRequest serviceName="OperacaoProducaoSP.criarApontamento">
     <requestBody>
@@ -1125,7 +1109,7 @@ def post_criaapontamento():
     # Fazendo o segundo POST
     response_post = requests.post(url_post, data=body_post, headers={'Content-Type': 'application/xml'})
 
-    # Extraindo informações do XML retornado
+    # Extraindo informaÃ§Ãµes do XML retornado
     info_from_xml = extract_info_from_xml(response_post.text)
 
     return jsonify(info_from_xml)
@@ -1178,7 +1162,7 @@ def post_apontars():
         # Decodificando o statusMessage em base64
         status_message = base64.b64decode(encoded_status_message).decode('utf-8', errors='replace')
 
-    # Criando um dicionário com os resultados
+    # Criando um dicionÃ¡rio com os resultados
     result_dict = {
         'status': status,
         'statusMessage': status_message,
@@ -1190,7 +1174,7 @@ def post_apontars():
 
 @app.route('/post_salvarapontamento3', methods=['GET'])
 def post_salvarapontamento3():
-    # Obtendo o parâmetro da URL para a tag IDIATV
+    # Obtendo o parÃ¢metro da URL para a tag IDIATV
     qnt_param = request.args.get('qnt')
     nuapo_param = request.args.get('nuapo')
     seqapa_param = request.args.get('seqapa')
@@ -1198,7 +1182,7 @@ def post_salvarapontamento3():
     url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {'Content-Type': 'application/json'}
 
-    # Corpo da requisição
+    # Corpo da requisiÃ§Ã£o
     body = {
         "serviceName": "MobileLoginSP.login",
         "requestBody": {
@@ -1208,7 +1192,7 @@ def post_salvarapontamento3():
         }
     }
 
-    # Fazendo a requisição
+    # Fazendo a requisiÃ§Ã£o
     response = requests.post(url, json=body, headers=headers)
     
     # Obtendo o jsessionid da resposta
@@ -1217,7 +1201,7 @@ def post_salvarapontamento3():
     # Realizando o segundo POST
     url_post = f"http://179.185.45.146:8280/mge/service.sbr?serviceName=CRUDServiceProvider.saveRecord&application=OperacaoProducao&mgeSession={jsessionid}&resourceID=br.com.sankhya.producao.cad.OperacaoProducao"
     
-    # Corpo da segunda requisição com o parâmetro da URL
+    # Corpo da segunda requisiÃ§Ã£o com o parÃ¢metro da URL
     body_post = f"""
         serviceRequest serviceName="CRUDServiceProvider.saveRecord\" ><requestBody>
     <dataSet rootEntity="ApontamentoPA" includePresentationFields="S" datasetid="1658322435343_10">
@@ -1240,21 +1224,21 @@ def post_salvarapontamento3():
     # Fazendo o segundo POST
     response_post = requests.post(url_post, data=body_post, headers={'Content-Type': 'application/xml'})
 
-    # Extraindo informações do XML retornado
+    # Extraindo informaÃ§Ãµes do XML retornado
     info_from_xml = extract_info_from_xml(response_post.text)
 
     return jsonify(info_from_xml)
 
 @app.route('/post_confirmarapontamento', methods=['GET'])
 def post_confirmarapontamento():
-    # Obtendo o parâmetro da URL para a tag IDIATV
+    # Obtendo o parÃ¢metro da URL para a tag IDIATV
     idiatv_param = request.args.get('idiatv')
     nuapo_param = request.args.get('nuapo')
 
     url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {'Content-Type': 'application/json'}
 
-    # Corpo da requisição
+    # Corpo da requisiÃ§Ã£o
     body = {
         "serviceName": "MobileLoginSP.login",
         "requestBody": {
@@ -1264,7 +1248,7 @@ def post_confirmarapontamento():
         }
     }
 
-    # Fazendo a requisição
+    # Fazendo a requisiÃ§Ã£o
     response = requests.post(url, json=body, headers=headers)
     
     # Obtendo o jsessionid da resposta
@@ -1273,7 +1257,7 @@ def post_confirmarapontamento():
     # Realizando o segundo POST
     url_post = f"http://179.185.45.146:8280/mgeprod/service.sbr?serviceName=OperacaoProducaoSP.confirmarApontamento&application=OperacaoProducao&mgeSession={jsessionid}&resourceID=br.com.sankhya.producao.cad.OperacaoProducao"
 
-    # Corpo da segunda requisição com o parâmetro da URL
+    # Corpo da segunda requisiÃ§Ã£o com o parÃ¢metro da URL
     body_post = f"""
         <serviceRequest serviceName="mgeprod@OperacaoProducaoSP.confirmarApontamento">
             <requestBody>
@@ -1284,14 +1268,14 @@ def post_confirmarapontamento():
     # Fazendo o segundo POST
     response_post = requests.post(url_post, data=body_post, headers={'Content-Type': 'application/xml'})
 
-    # Extraindo informações do XML retornado
+    # Extraindo informaÃ§Ãµes do XML retornado
     info_from_xml = extract_info_from_xml(response_post.text)
 
     return jsonify(info_from_xml)
 
 @app.route('/post_salvarapontamento2', methods=['GET'])
 def post_salvarapontamento2():
-    # Obtendo o parâmetro da URL para a tag IDIATV
+    # Obtendo o parÃ¢metro da URL para a tag IDIATV
     #qnt_param = request.args.get('qnt')
     #nuapo_param = request.args.get('nuapo')
     #seqapa_param = request.args.get('seqapa')
@@ -1299,7 +1283,7 @@ def post_salvarapontamento2():
     url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {'Content-Type': 'application/json'}
 
-    # Corpo da requisição
+    # Corpo da requisiÃ§Ã£o
     body = {
         "serviceName": "MobileLoginSP.login",
         "requestBody": {
@@ -1309,7 +1293,7 @@ def post_salvarapontamento2():
         }
     }
 
-    # Fazendo a requisição
+    # Fazendo a requisiÃ§Ã£o
     response = requests.post(url, json=body, headers=headers)
     
     # Obtendo o jsessionid da resposta
@@ -1319,7 +1303,7 @@ def post_salvarapontamento2():
     #url_post = f"http://179.185.45.146:8280/mge/service.sbr?serviceName=CRUDServiceProvider.saveRecord&application=OperacaoProducao&resourceID=br.com.sankhya.producao.cad.OperacaoProducao&mgeSession={jsessionid}"
     url_post = f"http://179.185.45.146:8280/mge/service.sbr?serviceName=CRUDServiceProvider.saveRecord&application=OperacaoProducao&resourceID=br.com.sankhya.producao.cad.OperacaoProducao&mgeSession={jsessionid}"
     print(url_post)
-    # Corpo da segunda requisição com o parâmetro da URL
+    # Corpo da segunda requisiÃ§Ã£o com o parÃ¢metro da URL
     body_post = f'''
     <serviceRequest serviceName=\"CRUDServiceProvider.saveRecord\" ><requestBody>\r\n    <dataSet rootEntity=\"ApontamentoPA\" includePresentationFields=\"S\" datasetid=\"1658322435343_10\">\r\n    <entity path=\"\"><fieldset list=\"*\"/><field name=\"CONTROLEPA\"/></entity>\r\n    <entity path=\"Produto\"><fieldset list=\"DECQTD,TIPCONTEST\"/></entity>\r\n    <entity path=\"MotivosPerda\"><field name=\"DESCRICAO\"/></entity>\r\n        <dataRow>\r\n            <localFields>\r\n                <QTDAPONTADA>10</QTDAPONTADA>\r\n            </localFields>\r\n            <key>\r\n                <NUAPO>92959</NUAPO>\r\n                <SEQAPA>1</SEQAPA>\r\n            </key>\r\n        </dataRow>\r\n    </dataSet>\r\n        </requestBody></serviceRequest>
     '''
@@ -1328,14 +1312,14 @@ def post_salvarapontamento2():
     # Fazendo o segundo POST
     response_post = requests.post(url_post, data=body_post, headers={'Content-Type': 'application/xml'})
 
-    # Extraindo informações do XML retornado
+    # Extraindo informaÃ§Ãµes do XML retornado
     info_from_xml = extract_info_from_xml(response_post.text)
 
     return jsonify(info_from_xml)
 
 @app.route('/post_salvarapontamento', methods=['GET'])
 def post_salvarapontamento():
-    # Configuração da primeira solicitação HTTP
+    # ConfiguraÃ§Ã£o da primeira solicitaÃ§Ã£o HTTP
     qnt_param = request.args.get('qnt')
     nuapo_param = request.args.get('nuapo')
     seqapa_param = request.args.get('seqapa')
@@ -1364,7 +1348,7 @@ def post_salvarapontamento():
         print(jsessionid)
         print(jsessionid2)
 
-        # Configuração da segunda solicitação usando o cookie da primeira API
+        # ConfiguraÃ§Ã£o da segunda solicitaÃ§Ã£o usando o cookie da primeira API
         segunda_api_url = f"http://179.185.45.146:8280/mge/service.sbr?serviceName=CRUDServiceProvider.saveRecord&application=OperacaoProducao&resourceID=br.com.sankhya.producao.cad.OperacaoProducao&mgeSession={jsessionid2}"
         segunda_api_headers = {
             "Content-Type": "application/json",
