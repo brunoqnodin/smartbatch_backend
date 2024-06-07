@@ -43,4 +43,4 @@ git clone https://github.com/brunoqnodin/smartbatch_backend.git
 ### Histórico de Versões
 
 #### Versões Disponíveis
-- **Versão 1.0.0** -> 07/02/2024
+- **Versão 1.0.0** -> 07/06/2024

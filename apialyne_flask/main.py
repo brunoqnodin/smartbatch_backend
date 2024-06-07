@@ -8,12 +8,21 @@ import random
 import requests
 import xml.etree.ElementTree as ET
 import base64
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+NOMUSU = os.getenv("NOMUSU")
+INTERNO = os.getenv("INTERNO")
+KEEP_CONNECTED = os.getenv("KEEP_CONNECTED")
+API_BASE_URL = os.getenv("API_BASE_URL")
 
 
 @app.route('/getHWAuto')
 def getHWAuto():
     try:
-        # ObtÃ©m uma conexÃ£o e cursor usando a extensÃ£o flask_mysqldb
+        # Obtém uma conexão e cursor usando a extensão flask_mysqldb
         conn = mysql.connection
         cursor = conn.cursor()
 
@@ -33,7 +42,7 @@ def getHWAuto():
         return resp
     except Exception as e:
         print(e)
-        resp = jsonify(error='Erro ao obter dados sintÃ©ticos')
+        resp = jsonify(error='Erro ao obter dados sintéticos')
         resp.status_code = 500
         return resp
     finally:
@@ -42,7 +51,7 @@ def getHWAuto():
 @app.route('/GetCentrosAuto')
 def getCentrosAuto():
     try:
-        # ObtÃ©m uma conexÃ£o e cursor usando a extensÃ£o flask_mysqldb
+        # Obtém uma conexão e cursor usando a extensão flask_mysqldb
         conn = mysql.connection
         cursor = conn.cursor()
 
@@ -62,7 +71,7 @@ def getCentrosAuto():
         return resp
     except Exception as e:
         print(e)
-        resp = jsonify(error='Erro ao obter dados sintÃ©ticos')
+        resp = jsonify(error='Erro ao obter dados sintéticos')
         resp.status_code = 500
         return resp
     finally:
@@ -71,7 +80,7 @@ def getCentrosAuto():
 @app.route('/GetColetor')
 def getColetor():
     try:
-        # ObtÃ©m uma conexÃ£o e cursor usando a extensÃ£o flask_mysqldb
+        # Obtém uma conexão e cursor usando a extensão flask_mysqldb
         conn = mysql.connection
         cursor = conn.cursor()
 
@@ -89,7 +98,7 @@ def getColetor():
         return resp
     except Exception as e:
         print(e)
-        resp = jsonify(error='Erro ao obter dados sintÃ©ticos')
+        resp = jsonify(error='Erro ao obter dados sintéticos')
         resp.status_code = 500
         return resp
     finally:
@@ -98,7 +107,7 @@ def getColetor():
 @app.route('/getIST2')
 def getIST2():
     try:
-        # ObtÃ©m uma conexÃ£o e cursor usando a extensÃ£o flask_mysqldb
+        # Obtém uma conexão e cursor usando a extensão flask_mysqldb
         conn = mysql.connection
         cursor = conn.cursor()
 
@@ -116,7 +125,7 @@ SELECT * FROM coletor_senai2 ORDER BY id DESC LIMIT 20
         return resp
     except Exception as e:
         print(e)
-        resp = jsonify(error='Erro ao obter dados sintÃ©ticos')
+        resp = jsonify(error='Erro ao obter dados sintéticos')
         resp.status_code = 500
         return resp
     finally:
@@ -125,7 +134,7 @@ SELECT * FROM coletor_senai2 ORDER BY id DESC LIMIT 20
 @app.route('/getIST3')
 def getIST3():
     try:
-        # ObtÃ©m uma conexÃ£o e cursor usando a extensÃ£o flask_mysqldb
+        # Obtém uma conexão e cursor usando a extensão flask_mysqldb
         conn = mysql.connection
         cursor = conn.cursor()
 
@@ -143,7 +152,7 @@ def getIST3():
         return resp
     except Exception as e:
         print(e)
-        resp = jsonify(error='Erro ao obter dados sintÃ©ticos')
+        resp = jsonify(error='Erro ao obter dados sintéticos')
         resp.status_code = 500
         return resp
     finally:
@@ -254,14 +263,14 @@ def post():
 
 @app.route('/centros_trabalho', methods=['GET'])
 def get_centros_trabalho():
-    # ConfiguraÃ§Ã£o da primeira solicitaÃ§Ã£o HTTP
-    login_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
+    # Configuração da primeira solicitação HTTP
+    login_url = f"{API_BASE_URL}/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {"Content-Type": "application/json"}
     payload = {
         "serviceName": "MobileLoginSP.login",
         "requestBody": {
-            "NOMUSU": { "$": "IRANILDO" },
-            "INTERNO": { "$": "123456" },
+            "NOMUSU": { "$": NOMUSU },
+            "INTERNO": { "$": INTERNO },
             "KEEPCONNECTED": { "$": "S" }
         }
     }
@@ -276,8 +285,8 @@ def get_centros_trabalho():
         cookie = response.headers['set-cookie'].split(';')[0]
         jsessionid = cookie
 
-        # ConfiguraÃ§Ã£o da segunda solicitaÃ§Ã£o usando o cookie da primeira API
-        segunda_api_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json"
+        # Configuração da segunda solicitação usando o cookie da primeira API
+        segunda_api_url = f"{API_BASE_URL}/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json"
         segunda_api_headers = {
             "Content-Type": "application/json",
             "Cookie": jsessionid
@@ -302,14 +311,14 @@ def get_centros_trabalho():
 
 @app.route('/ordem_producao', methods=['GET'])
 def get_ordem_producao():
-    # ConfiguraÃ§Ã£o da primeira solicitaÃ§Ã£o HTTP
-    login_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
+    # Configuração da primeira solicitação HTTP
+    login_url = f"{API_BASE_URL}/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {"Content-Type": "application/json"}
     payload = {
         "serviceName": "MobileLoginSP.login",
         "requestBody": {
-            "NOMUSU": { "$": "IRANILDO" },
-            "INTERNO": { "$": "123456" },
+            "NOMUSU": { "$": NOMUSU },
+            "INTERNO": { "$": INTERNO },
             "KEEPCONNECTED": { "$": "S" }
         }
     }
@@ -324,8 +333,8 @@ def get_ordem_producao():
         cookie = response.headers['set-cookie'].split(';')[0]
         jsessionid = cookie
 
-        # ConfiguraÃ§Ã£o da segunda solicitaÃ§Ã£o usando o cookie da primeira API
-        segunda_api_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json"
+        # Configuração da segunda solicitação usando o cookie da primeira API
+        segunda_api_url = f"{API_BASE_URL}/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json"
         segunda_api_headers = {
             "Content-Type": "application/json",
             "Cookie": jsessionid
@@ -350,14 +359,14 @@ def get_ordem_producao():
     
 @app.route('/materia_prima', methods=['GET'])
 def get_materia_prima():
-    # ConfiguraÃ§Ã£o da primeira solicitaÃ§Ã£o HTTP
-    login_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
+    # Configuração da primeira solicitação HTTP
+    login_url = f"{API_BASE_URL}/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {"Content-Type": "application/json"}
     payload = {
         "serviceName": "MobileLoginSP.login",
         "requestBody": {
-            "NOMUSU": { "$": "IRANILDO" },
-            "INTERNO": { "$": "123456" },
+            "NOMUSU": { "$": NOMUSU },
+            "INTERNO": { "$": INTERNO },
             "KEEPCONNECTED": { "$": "S" }
         }
     }
@@ -372,8 +381,8 @@ def get_materia_prima():
         cookie = response.headers['set-cookie'].split(';')[0]
         jsessionid = cookie
 
-        # ConfiguraÃ§Ã£o da segunda solicitaÃ§Ã£o usando o cookie da primeira API
-        segunda_api_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json"
+        # Configuração da segunda solicitação usando o cookie da primeira API
+        segunda_api_url = f"{API_BASE_URL}/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json"
         segunda_api_headers = {
             "Content-Type": "application/json",
             "Cookie": jsessionid
@@ -398,14 +407,15 @@ def get_materia_prima():
 
 @app.route('/produto', methods=['GET'])
 def get_produto():
-    # ConfiguraÃ§Ã£o da primeira solicitaÃ§Ã£o HTTP
-    login_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
+    print(NOMUSU)
+    # Configuração da primeira solicitação HTTP
+    login_url = f"{API_BASE_URL}/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {"Content-Type": "application/json"}
     payload = {
         "serviceName": "MobileLoginSP.login",
         "requestBody": {
-            "NOMUSU": { "$": "IRANILDO" },
-            "INTERNO": { "$": "123456" },
+            "NOMUSU": { "$": NOMUSU },
+            "INTERNO": { "$": INTERNO },
             "KEEPCONNECTED": { "$": "S" }
         }
     }
@@ -420,8 +430,8 @@ def get_produto():
         cookie = response.headers['set-cookie'].split(';')[0]
         jsessionid = cookie
 
-        # ConfiguraÃ§Ã£o da segunda solicitaÃ§Ã£o usando o cookie da primeira API
-        segunda_api_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json"
+        # Configuração da segunda solicitação usando o cookie da primeira API
+        segunda_api_url = f"http://201.20.91.238:8280/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json"
         segunda_api_headers = {
             "Content-Type": "application/json",
             "Cookie": jsessionid
@@ -450,16 +460,16 @@ def get_funcionarios():
     matricula = request.args.get('matricula')
 
     if matricula is None:
-        return jsonify({"error": "O parÃ¢metro 'matricula' Ã© obrigatÃ³rio"}), 400
+        return jsonify({"error": "O parâmetro 'matricula' é obrigatório"}), 400
 
-    # ConfiguraÃ§Ã£o da primeira solicitaÃ§Ã£o HTTP
-    login_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
+    # Configuração da primeira solicitação HTTP
+    login_url = f"{API_BASE_URL}/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {"Content-Type": "application/json"}
     payload = {
         "serviceName": "MobileLoginSP.login",
         "requestBody": {
-            "NOMUSU": { "$": "IRANILDO" },
-            "INTERNO": { "$": "123456" },
+            "NOMUSU": { "$": NOMUSU },
+            "INTERNO": { "$": INTERNO },
             "KEEPCONNECTED": { "$": "S" }
         }
     }
@@ -474,8 +484,8 @@ def get_funcionarios():
         cookie = response.headers['set-cookie'].split(';')[0]
         jsessionid = cookie
 
-        # ConfiguraÃ§Ã£o da segunda solicitaÃ§Ã£o usando o cookie da primeira API
-        segunda_api_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json"
+        # Configuração da segunda solicitação usando o cookie da primeira API
+        segunda_api_url = f"{API_BASE_URL}/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json"
         segunda_api_headers = {
             "Content-Type": "application/json",
             "Cookie": jsessionid
@@ -503,16 +513,16 @@ def get_apontamentos():
     idiatv = request.args.get('idiatv')
 
     if idiatv is None:
-        return jsonify({"error": "O parÃ¢metro 'idiatv' Ã© obrigatÃ³rio"}), 400
+        return jsonify({"error": "O parâmetro 'idiatv' é obrigatório"}), 400
 
-    # ConfiguraÃ§Ã£o da primeira solicitaÃ§Ã£o HTTP
-    login_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
+    # Configuração da primeira solicitação HTTP
+    login_url = f"{API_BASE_URL}/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {"Content-Type": "application/json"}
     payload = {
         "serviceName": "MobileLoginSP.login",
         "requestBody": {
-            "NOMUSU": { "$": "IRANILDO" },
-            "INTERNO": { "$": "123456" },
+            "NOMUSU": { "$": NOMUSU },
+            "INTERNO": { "$": INTERNO },
             "KEEPCONNECTED": { "$": "S" }
         }
     }
@@ -527,8 +537,8 @@ def get_apontamentos():
         cookie = response.headers['set-cookie'].split(';')[0]
         jsessionid = cookie
 
-        # ConfiguraÃ§Ã£o da segunda solicitaÃ§Ã£o usando o cookie da primeira API
-        segunda_api_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json"
+        # Configuração da segunda solicitação usando o cookie da primeira API
+        segunda_api_url = f"{API_BASE_URL}/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json"
         segunda_api_headers = {
             "Content-Type": "application/json",
             "Cookie": jsessionid
@@ -553,14 +563,14 @@ def get_apontamentos():
 
 @app.route('/motivo_paradas', methods=['GET'])
 def get_motivo_paradas():
-    # ConfiguraÃ§Ã£o da primeira solicitaÃ§Ã£o HTTP
-    login_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
+    # Configuração da primeira solicitação HTTP
+    login_url = "http://201.20.91.238:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {"Content-Type": "application/json"}
     payload = {
         "serviceName": "MobileLoginSP.login",
         "requestBody": {
-            "NOMUSU": { "$": "IRANILDO" },
-            "INTERNO": { "$": "123456" },
+            "NOMUSU": { "$": NOMUSU },
+            "INTERNO": { "$": INTERNO },
             "KEEPCONNECTED": { "$": "S" }
         }
     }
@@ -575,8 +585,8 @@ def get_motivo_paradas():
         cookie = response.headers['set-cookie'].split(';')[0]
         jsessionid = cookie
 
-        # ConfiguraÃ§Ã£o da segunda solicitaÃ§Ã£o usando o cookie da primeira API
-        segunda_api_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json"
+        # Configuração da segunda solicitação usando o cookie da primeira API
+        segunda_api_url = "http://201.20.91.238:8280/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json"
         segunda_api_headers = {
             "Content-Type": "application/json",
             "Cookie": jsessionid
@@ -602,14 +612,14 @@ def get_motivo_paradas():
 @app.route('/fluxo', methods=['GET'])
 def get_fluxo():
     codprod = request.args.get('codprod')
-    # ConfiguraÃ§Ã£o da primeira solicitaÃ§Ã£o HTTP
-    login_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
+    # Configuração da primeira solicitação HTTP
+    login_url = f"{API_BASE_URL}/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {"Content-Type": "application/json"}
     payload = {
         "serviceName": "MobileLoginSP.login",
         "requestBody": {
-            "NOMUSU": { "$": "IRANILDO" },
-            "INTERNO": { "$": "123456" },
+            "NOMUSU": { "$": NOMUSU },
+            "INTERNO": { "$": INTERNO },
             "KEEPCONNECTED": { "$": "S" }
         }
     }
@@ -624,8 +634,8 @@ def get_fluxo():
         cookie = response.headers['set-cookie'].split(';')[0]
         jsessionid = cookie
 
-        # ConfiguraÃ§Ã£o da segunda solicitaÃ§Ã£o usando o cookie da primeira API
-        segunda_api_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json"
+        # Configuração da segunda solicitação usando o cookie da primeira API
+        segunda_api_url = f"{API_BASE_URL}/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json"
         segunda_api_headers = {
             "Content-Type": "application/json",
             "Cookie": jsessionid
@@ -656,15 +666,15 @@ def get_fluxo_detail():
     codprod = request.args.get('codprod')
 
     if codseq is None:
-        return jsonify({"error": "O parÃ¢metro 'codseq' Ã© obrigatÃ³rio"}), 400
-    # ConfiguraÃ§Ã£o da primeira solicitaÃ§Ã£o HTTP
-    login_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
+        return jsonify({"error": "O parâmetro 'codseq' é obrigatório"}), 400
+    # Configuração da primeira solicitação HTTP
+    login_url = f"{API_BASE_URL}/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {"Content-Type": "application/json"}
     payload = {
         "serviceName": "MobileLoginSP.login",
         "requestBody": {
-            "NOMUSU": { "$": "IRANILDO" },
-            "INTERNO": { "$": "123456" },
+            "NOMUSU": { "$": NOMUSU },
+            "INTERNO": { "$": INTERNO },
             "KEEPCONNECTED": { "$": "S" }
         }
     }
@@ -679,8 +689,8 @@ def get_fluxo_detail():
         cookie = response.headers['set-cookie'].split(';')[0]
         jsessionid = cookie
 
-        # ConfiguraÃ§Ã£o da segunda solicitaÃ§Ã£o usando o cookie da primeira API
-        segunda_api_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json"
+        # Configuração da segunda solicitação usando o cookie da primeira API
+        segunda_api_url = f"{API_BASE_URL}/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json"
         segunda_api_headers = {
             "Content-Type": "application/json",
             "Cookie": jsessionid
@@ -710,15 +720,15 @@ def get_ordem_producao_detail():
     codordem = request.args.get('codordem')
 
     if codordem is None:
-        return jsonify({"error": "O parÃ¢metro 'codcentro' Ã© obrigatÃ³rio"}), 400
-    # ConfiguraÃ§Ã£o da primeira solicitaÃ§Ã£o HTTP
-    login_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
+        return jsonify({"error": "O parâmetro 'codcentro' é obrigatório"}), 400
+    # Configuração da primeira solicitação HTTP
+    login_url = f"{API_BASE_URL}/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {"Content-Type": "application/json"}
     payload = {
         "serviceName": "MobileLoginSP.login",
         "requestBody": {
-            "NOMUSU": { "$": "IRANILDO" },
-            "INTERNO": { "$": "123456" },
+            "NOMUSU": { "$": NOMUSU },
+            "INTERNO": { "$": INTERNO },
             "KEEPCONNECTED": { "$": "S" }
         }
     }
@@ -733,8 +743,8 @@ def get_ordem_producao_detail():
         cookie = response.headers['set-cookie'].split(';')[0]
         jsessionid = cookie
 
-        # ConfiguraÃ§Ã£o da segunda solicitaÃ§Ã£o usando o cookie da primeira API
-        segunda_api_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json"
+        # Configuração da segunda solicitação usando o cookie da primeira API
+        segunda_api_url = f"{API_BASE_URL}/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json"
         segunda_api_headers = {
             "Content-Type": "application/json",
             "Cookie": jsessionid
@@ -762,15 +772,15 @@ def get_ordem_producao_centro():
     centro = request.args.get('centro')
 
     if centro is None:
-        return jsonify({"error": "O parÃ¢metro 'centro' Ã© obrigatÃ³rio"}), 400
-    # ConfiguraÃ§Ã£o da primeira solicitaÃ§Ã£o HTTP
-    login_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
+        return jsonify({"error": "O parâmetro 'centro' é obrigatório"}), 400
+    # Configuração da primeira solicitação HTTP
+    login_url = f"{API_BASE_URL}/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {"Content-Type": "application/json"}
     payload = {
         "serviceName": "MobileLoginSP.login",
         "requestBody": {
-            "NOMUSU": { "$": "IRANILDO" },
-            "INTERNO": { "$": "123456" },
+            "NOMUSU": { "$": NOMUSU },
+            "INTERNO": { "$": INTERNO },
             "KEEPCONNECTED": { "$": "S" }
         }
     }
@@ -785,8 +795,8 @@ def get_ordem_producao_centro():
         cookie = response.headers['set-cookie'].split(';')[0]
         jsessionid = cookie
 
-        # ConfiguraÃ§Ã£o da segunda solicitaÃ§Ã£o usando o cookie da primeira API
-        segunda_api_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json"
+        # Configuração da segunda solicitação usando o cookie da primeira API
+        segunda_api_url = f"{API_BASE_URL}/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json"
         segunda_api_headers = {
             "Content-Type": "application/json",
             "Cookie": jsessionid
@@ -822,32 +832,32 @@ def extract_info_from_xml(xml_text):
 # Rota para a primeira consulta
 @app.route('/post_continuar_op', methods=['GET'])
 def post_continuar_op():
-    # Obtendo o parÃ¢metro da URL para a tag IDIATV
+    # Obtendo o parâmetro da URL para a tag IDIATV
     idiatv_param = request.args.get('idiatv')
 
-    url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
+    url = f"{API_BASE_URL}/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {'Content-Type': 'application/json'}
 
-    # Corpo da requisiÃ§Ã£o
+    # Corpo da requisição
     body = {
         "serviceName": "MobileLoginSP.login",
         "requestBody": {
-            "NOMUSU": {"$": "IRANILDO"},
-            "INTERNO": {"$": "123456"},
+            "NOMUSU": {"$": NOMUSU},
+            "INTERNO": {"$": INTERNO},
             "KEEPCONNECTED": {"$": "S"}
         }
     }
 
-    # Fazendo a requisiÃ§Ã£o
+    # Fazendo a requisição
     response = requests.post(url, json=body, headers=headers)
     
     # Obtendo o jsessionid da resposta
     jsessionid = response.json().get('responseBody', {}).get('jsessionid', {}).get('$', '')
 
     # Realizando o segundo POST
-    url_post = f"http://179.185.45.146:8280/mgeprod/service.sbr?serviceName=OperacaoProducaoSP.continuarInstanciaAtividades&application=OperacaoProducao&mgeSession={jsessionid}&resourceID=br.com.sankhya.producao.cad.OperacaoProducao"
+    url_post = f"{API_BASE_URL}/mgeprod/service.sbr?serviceName=OperacaoProducaoSP.continuarInstanciaAtividades&application=OperacaoProducao&mgeSession={jsessionid}&resourceID=br.com.sankhya.producao.cad.OperacaoProducao"
 
-    # Corpo da segunda requisiÃ§Ã£o com o parÃ¢metro da URL
+    # Corpo da segunda requisição com o parâmetro da URL
     body_post = f"""
     <serviceRequest serviceName="OperacaoProducaoSP.continuarInstanciaAtividades">
         <requestBody>
@@ -863,7 +873,7 @@ def post_continuar_op():
     # Fazendo o segundo POST
     response_post = requests.post(url_post, data=body_post, headers={'Content-Type': 'application/xml'})
 
-    # Extraindo informaÃ§Ãµes do XML retornado
+    # Extraindo informações do XML retornado
     info_from_xml = extract_info_from_xml(response_post.text)
 
     return jsonify(info_from_xml)
@@ -871,32 +881,32 @@ def post_continuar_op():
 
 @app.route('/post_iniciarop', methods=['GET'])
 def post_iniciarop():
-    # Obtendo o parÃ¢metro da URL para a tag IDIATV
+    # Obtendo o parâmetro da URL para a tag IDIATV
     idiatv_param = request.args.get('idiatv', default='1')
 
-    url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
+    url = f"{API_BASE_URL}/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {'Content-Type': 'application/json'}
 
-    # Corpo da requisiÃ§Ã£o
+    # Corpo da requisição
     body = {
         "serviceName": "MobileLoginSP.login",
         "requestBody": {
-            "NOMUSU": {"$": "IRANILDO"},
-            "INTERNO": {"$": "123456"},
+            "NOMUSU": {"$": NOMUSU},
+            "INTERNO": {"$": INTERNO},
             "KEEPCONNECTED": {"$": "S"}
         }
     }
 
-    # Fazendo a requisiÃ§Ã£o
+    # Fazendo a requisição
     response = requests.post(url, json=body, headers=headers)
     
     # Obtendo o jsessionid da resposta
     jsessionid = response.json().get('responseBody', {}).get('jsessionid', {}).get('$', '')
 
     # Realizando o segundo POST
-    url_post = f"http://179.185.45.146:8280/mgeprod/service.sbr?serviceName=OperacaoProducaoSP.iniciarInstanciaAtividades&application=OperacaoProducao&mgeSession={jsessionid}&resourceID=br.com.sankhya.producao.cad.OperacaoProducao"
+    url_post = f"{API_BASE_URL}/mgeprod/service.sbr?serviceName=OperacaoProducaoSP.iniciarInstanciaAtividades&application=OperacaoProducao&mgeSession={jsessionid}&resourceID=br.com.sankhya.producao.cad.OperacaoProducao"
 
-    # Corpo da segunda requisiÃ§Ã£o com o parÃ¢metro da URL
+    # Corpo da segunda requisição com o parâmetro da URL
     body_post = f"""
     <serviceRequest serviceName="OperacaoProducaoSP.iniciarInstanciaAtividades">
         <requestBody>
@@ -912,7 +922,7 @@ def post_iniciarop():
     # Fazendo o segundo POST
     response_post = requests.post(url_post, data=body_post, headers={'Content-Type': 'application/xml'})
 
-    # Extraindo informaÃ§Ãµes do XML retornado
+    # Extraindo informações do XML retornado
     info_from_xml = extract_info_from_xml(response_post.text)
 
     return jsonify(info_from_xml)
@@ -920,33 +930,33 @@ def post_iniciarop():
 
 @app.route('/post_parar_maquina', methods=['GET'])
 def post_parar_maquina():
-    # Obtendo o parÃ¢metro da URL para a tag IDIATV
+    # Obtendo o parâmetro da URL para a tag IDIATV
     idiatv_param = request.args.get('idiatv')
     codmtp_param = request.args.get('codmtp')
 
-    url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
+    url = f"{API_BASE_URL}/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {'Content-Type': 'application/json'}
 
-    # Corpo da requisiÃ§Ã£o
+    # Corpo da requisição
     body = {
         "serviceName": "MobileLoginSP.login",
         "requestBody": {
-            "NOMUSU": {"$": "IRANILDO"},
-            "INTERNO": {"$": "123456"},
+            "NOMUSU": {"$": NOMUSU},
+            "INTERNO": {"$": INTERNO},
             "KEEPCONNECTED": {"$": "S"}
         }
     }
 
-    # Fazendo a requisiÃ§Ã£o
+    # Fazendo a requisição
     response = requests.post(url, json=body, headers=headers)
     
     # Obtendo o jsessionid da resposta
     jsessionid = response.json().get('responseBody', {}).get('jsessionid', {}).get('$', '')
 
     # Realizando o segundo POST
-    url_post = f"http://179.185.45.146:8280/mgeprod/service.sbr?application=OperacaoProducao&mgeSession={jsessionid}&serviceName=OperacaoProducaoSP.pararInstanciaAtividades"
+    url_post = f"{API_BASE_URL}/mgeprod/service.sbr?application=OperacaoProducao&mgeSession={jsessionid}&serviceName=OperacaoProducaoSP.pararInstanciaAtividades"
 
-    # Corpo da segunda requisiÃ§Ã£o com o parÃ¢metro da URL
+    # Corpo da segunda requisição com o parâmetro da URL
     body_post = f"""
     <serviceRequest serviceName="OperacaoProducaoSP.pararInstanciaAtividades">
     <requestBody>
@@ -964,42 +974,42 @@ def post_parar_maquina():
     # Fazendo o segundo POST
     response_post = requests.post(url_post, data=body_post, headers={'Content-Type': 'application/xml'})
 
-    # Extraindo informaÃ§Ãµes do XML retornado
+    # Extraindo informações do XML retornado
     info_from_xml = extract_info_from_xml(response_post.text)
 
     return jsonify(info_from_xml)
 
 @app.route('/post_finalizarop', methods=['GET'])
 def post_finalizarop():
-    # Obtendo o parÃ¢metro da URL para a tag IDIATV
+    # Obtendo o parâmetro da URL para a tag IDIATV
     idiatv_param = request.args.get('idiatv')
     idefx_param = request.args.get('idefx')
     idiproc_param = request.args.get('idiproc')
     idproc_param = request.args.get('idproc')
 
-    url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
+    url = f"{API_BASE_URL}/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {'Content-Type': 'application/json'}
 
-    # Corpo da requisiÃ§Ã£o
+    # Corpo da requisição
     body = {
         "serviceName": "MobileLoginSP.login",
         "requestBody": {
-            "NOMUSU": {"$": "IRANILDO"},
-            "INTERNO": {"$": "123456"},
+            "NOMUSU": {"$": NOMUSU},
+            "INTERNO": {"$": INTERNO},
             "KEEPCONNECTED": {"$": "S"}
         }
     }
 
-    # Fazendo a requisiÃ§Ã£o
+    # Fazendo a requisição
     response = requests.post(url, json=body, headers=headers)
     
     # Obtendo o jsessionid da resposta
     jsessionid = response.json().get('responseBody', {}).get('jsessionid', {}).get('$', '')
 
     # Realizando o segundo POST
-    url_post = f"http://179.185.45.146:8280/mgeprod/service.sbr?serviceName=OperacaoProducaoSP.finalizarInstanciaAtividades&mgeSession={jsessionid}"
+    url_post = f"{API_BASE_URL}/mgeprod/service.sbr?serviceName=OperacaoProducaoSP.finalizarInstanciaAtividades&mgeSession={jsessionid}"
 
-    # Corpo da segunda requisiÃ§Ã£o com o parÃ¢metro da URL
+    # Corpo da segunda requisição com o parâmetro da URL
     body_post = f"""
     <serviceRequest serviceName="OperacaoProducaoSP.finalizarInstanciaAtividades">
     <requestBody>
@@ -1018,41 +1028,41 @@ def post_finalizarop():
     # Fazendo o segundo POST
     response_post = requests.post(url_post, data=body_post, headers={'Content-Type': 'application/xml'})
 
-    # Extraindo informaÃ§Ãµes do XML retornado
+    # Extraindo informações do XML retornado
     info_from_xml = extract_info_from_xml(response_post.text)
 
     return jsonify(info_from_xml)
 
 @app.route('/post_realocacentro', methods=['GET'])
 def post_realocacentro():
-    # Obtendo o parÃ¢metro da URL para a tag IDIATV
+    # Obtendo o parâmetro da URL para a tag IDIATV
     idiatv_param = request.args.get('idiatv')
     idiproc_param = request.args.get('idiproc')
     codwcp_param = request.args.get('codwcp')
 
-    url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
+    url = f"{API_BASE_URL}/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {'Content-Type': 'application/json'}
 
-    # Corpo da requisiÃ§Ã£o
+    # Corpo da requisição
     body = {
         "serviceName": "MobileLoginSP.login",
         "requestBody": {
-            "NOMUSU": {"$": "IRANILDO"},
-            "INTERNO": {"$": "123456"},
+            "NOMUSU": {"$": NOMUSU},
+            "INTERNO": {"$": INTERNO},
             "KEEPCONNECTED": {"$": "S"}
         }
     }
 
-    # Fazendo a requisiÃ§Ã£o
+    # Fazendo a requisição
     response = requests.post(url, json=body, headers=headers)
     
     # Obtendo o jsessionid da resposta
     jsessionid = response.json().get('responseBody', {}).get('jsessionid', {}).get('$', '')
 
     # Realizando o segundo POST
-    url_post = f"http://179.185.45.146:8280/mgeprod/service.sbr?application=OperacaoProducao&mgeSession={jsessionid}&serviceName=OperacaoProducaoSP.realocarCentroDeTrabalhoPorCategoria"
+    url_post = f"{API_BASE_URL}/mgeprod/service.sbr?application=OperacaoProducao&mgeSession={jsessionid}&serviceName=OperacaoProducaoSP.realocarCentroDeTrabalhoPorCategoria"
 
-    # Corpo da segunda requisiÃ§Ã£o com o parÃ¢metro da URL
+    # Corpo da segunda requisição com o parâmetro da URL
     body_post = f"""
         <serviceRequest serviceName="OperacaoProducaoSP.realocarCentroDeTrabalhoPorCategoria">
             <requestBody>
@@ -1064,40 +1074,88 @@ def post_realocacentro():
     # Fazendo o segundo POST
     response_post = requests.post(url_post, data=body_post, headers={'Content-Type': 'application/xml'})
 
-    # Extraindo informaÃ§Ãµes do XML retornado
+    # Extraindo informações do XML retornado
     info_from_xml = extract_info_from_xml(response_post.text)
 
     return jsonify(info_from_xml)
 
 
-@app.route('/post_criaapontamento', methods=['GET'])
-def post_criaapontamento():
-    # Obtendo o parÃ¢metro da URL para a tag IDIATV
+@app.route('/post_liberarcentro', methods=['GET'])
+def post_liberarcentro():
+    # Obtendo o parâmetro da URL para a tag IDIATV
     idiatv_param = request.args.get('idiatv')
 
-    url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
+    url = f"{API_BASE_URL}/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {'Content-Type': 'application/json'}
 
-    # Corpo da requisiÃ§Ã£o
+    # Corpo da requisição
     body = {
         "serviceName": "MobileLoginSP.login",
         "requestBody": {
-            "NOMUSU": {"$": "IRANILDO"},
-            "INTERNO": {"$": "123456"},
+            "NOMUSU": {"$": NOMUSU},
+            "INTERNO": {"$": INTERNO},
             "KEEPCONNECTED": {"$": "S"}
         }
     }
 
-    # Fazendo a requisiÃ§Ã£o
+    # Fazendo a requisição
     response = requests.post(url, json=body, headers=headers)
     
     # Obtendo o jsessionid da resposta
     jsessionid = response.json().get('responseBody', {}).get('jsessionid', {}).get('$', '')
 
     # Realizando o segundo POST
-    url_post = f"http://179.185.45.146:8280/mgeprod/service.sbr?serviceName=OperacaoProducaoSP.criarApontamento&application=OperacaoProducao&mgeSession={jsessionid}&resourceID=br.com.sankhya.producao.cad.OperacaoProducao"
+    url_post = f"{API_BASE_URL}/mgeprod/service.sbr?serviceName=OperacaoProducaoSP.liberarCentroDeTrabalho&counter=4040370301&application=OperacaoProducao&mgeSession={jsessionid}&resourceID=br.com.sankhya.producao.cad.OperacaoProducao"
 
-    # Corpo da segunda requisiÃ§Ã£o com o parÃ¢metro da URL
+    # Corpo da segunda requisição com o parâmetro da URL
+    body_post = f"""
+    <serviceRequest serviceName="OperacaoProducaoSP.liberarCentroDeTrabalho">
+    <requestBody>
+        <instancias>
+            <instancia>
+                <IDIATV>{idiatv_param}</IDIATV>
+            </instancia>
+        </instancias>
+       </requestBody>
+    </serviceRequest>
+    """
+
+    # Fazendo o segundo POST
+    response_post = requests.post(url_post, data=body_post, headers={'Content-Type': 'application/xml'})
+
+    # Extraindo informações do XML retornado
+    info_from_xml = extract_info_from_xml(response_post.text)
+
+    return jsonify(info_from_xml)
+
+@app.route('/post_criaapontamento', methods=['GET'])
+def post_criaapontamento():
+    # Obtendo o parâmetro da URL para a tag IDIATV
+    idiatv_param = request.args.get('idiatv')
+
+    url = f"{API_BASE_URL}/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
+    headers = {'Content-Type': 'application/json'}
+
+    # Corpo da requisição
+    body = {
+        "serviceName": "MobileLoginSP.login",
+        "requestBody": {
+            "NOMUSU": {"$": NOMUSU},
+            "INTERNO": {"$": INTERNO},
+            "KEEPCONNECTED": {"$": "S"}
+        }
+    }
+
+    # Fazendo a requisição
+    response = requests.post(url, json=body, headers=headers)
+    
+    # Obtendo o jsessionid da resposta
+    jsessionid = response.json().get('responseBody', {}).get('jsessionid', {}).get('$', '')
+
+    # Realizando o segundo POST
+    url_post = f"{API_BASE_URL}/mgeprod/service.sbr?serviceName=OperacaoProducaoSP.criarApontamento&application=OperacaoProducao&mgeSession={jsessionid}&resourceID=br.com.sankhya.producao.cad.OperacaoProducao"
+
+    # Corpo da segunda requisição com o parâmetro da URL
     body_post = f"""
     <serviceRequest serviceName="OperacaoProducaoSP.criarApontamento">
     <requestBody>
@@ -1109,7 +1167,7 @@ def post_criaapontamento():
     # Fazendo o segundo POST
     response_post = requests.post(url_post, data=body_post, headers={'Content-Type': 'application/xml'})
 
-    # Extraindo informaÃ§Ãµes do XML retornado
+    # Extraindo informações do XML retornado
     info_from_xml = extract_info_from_xml(response_post.text)
 
     return jsonify(info_from_xml)
@@ -1119,13 +1177,13 @@ def post_apontars():
     
     idiatv_param = request.args.get('idiatv')
     
-    url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
+    url = f"{API_BASE_URL}/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {'Content-Type': 'application/json'}
     body = {
         "serviceName": "MobileLoginSP.login",
         "requestBody": {
-            "NOMUSU": {"$": "IRANILDO"},
-            "INTERNO": {"$": "123456"},
+            "NOMUSU": {"$": NOMUSU},
+            "INTERNO": {"$": INTERNO},
             "KEEPCONNECTED": {"$": "S"}
         }
     }
@@ -1133,7 +1191,7 @@ def post_apontars():
     response = requests.post(url, json=body, headers=headers)
     jsessionid = response.json().get('responseBody', {}).get('jsessionid', {}).get('$', '')
 
-    url_post = f"http://179.185.45.146:8280/mgeprod/service.sbr?serviceName=OperacaoProducaoSP.criarApontamento&application=OperacaoProducao&mgeSession={jsessionid}&resourceID=br.com.sankhya.producao.cad.OperacaoProducao"
+    url_post = f"{API_BASE_URL}/mgeprod/service.sbr?serviceName=OperacaoProducaoSP.criarApontamento&application=OperacaoProducao&mgeSession={jsessionid}&resourceID=br.com.sankhya.producao.cad.OperacaoProducao"
 
     body_post = f"""
         <serviceRequest serviceName="OperacaoProducaoSP.criarApontamento">
@@ -1162,7 +1220,7 @@ def post_apontars():
         # Decodificando o statusMessage em base64
         status_message = base64.b64decode(encoded_status_message).decode('utf-8', errors='replace')
 
-    # Criando um dicionÃ¡rio com os resultados
+    # Criando um dicionário com os resultados
     result_dict = {
         'status': status,
         'statusMessage': status_message,
@@ -1174,34 +1232,34 @@ def post_apontars():
 
 @app.route('/post_salvarapontamento3', methods=['GET'])
 def post_salvarapontamento3():
-    # Obtendo o parÃ¢metro da URL para a tag IDIATV
+    # Obtendo o parâmetro da URL para a tag IDIATV
     qnt_param = request.args.get('qnt')
     nuapo_param = request.args.get('nuapo')
     seqapa_param = request.args.get('seqapa')
 
-    url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
+    url = f"{API_BASE_URL}/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {'Content-Type': 'application/json'}
 
-    # Corpo da requisiÃ§Ã£o
+    # Corpo da requisição
     body = {
         "serviceName": "MobileLoginSP.login",
         "requestBody": {
-            "NOMUSU": {"$": "IRANILDO"},
-            "INTERNO": {"$": "123456"},
+            "NOMUSU": {"$": NOMUSU},
+            "INTERNO": {"$": INTERNO},
             "KEEPCONNECTED": {"$": "S"}
         }
     }
 
-    # Fazendo a requisiÃ§Ã£o
+    # Fazendo a requisição
     response = requests.post(url, json=body, headers=headers)
     
     # Obtendo o jsessionid da resposta
     jsessionid = response.json().get('responseBody', {}).get('jsessionid', {}).get('$', '')
 
     # Realizando o segundo POST
-    url_post = f"http://179.185.45.146:8280/mge/service.sbr?serviceName=CRUDServiceProvider.saveRecord&application=OperacaoProducao&mgeSession={jsessionid}&resourceID=br.com.sankhya.producao.cad.OperacaoProducao"
+    url_post = f"{API_BASE_URL}/mge/service.sbr?serviceName=CRUDServiceProvider.saveRecord&application=OperacaoProducao&mgeSession={jsessionid}&resourceID=br.com.sankhya.producao.cad.OperacaoProducao"
     
-    # Corpo da segunda requisiÃ§Ã£o com o parÃ¢metro da URL
+    # Corpo da segunda requisição com o parâmetro da URL
     body_post = f"""
         serviceRequest serviceName="CRUDServiceProvider.saveRecord\" ><requestBody>
     <dataSet rootEntity="ApontamentoPA" includePresentationFields="S" datasetid="1658322435343_10">
@@ -1224,40 +1282,40 @@ def post_salvarapontamento3():
     # Fazendo o segundo POST
     response_post = requests.post(url_post, data=body_post, headers={'Content-Type': 'application/xml'})
 
-    # Extraindo informaÃ§Ãµes do XML retornado
+    # Extraindo informações do XML retornado
     info_from_xml = extract_info_from_xml(response_post.text)
 
     return jsonify(info_from_xml)
 
 @app.route('/post_confirmarapontamento', methods=['GET'])
 def post_confirmarapontamento():
-    # Obtendo o parÃ¢metro da URL para a tag IDIATV
+    # Obtendo o parâmetro da URL para a tag IDIATV
     idiatv_param = request.args.get('idiatv')
     nuapo_param = request.args.get('nuapo')
 
-    url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
+    url = f"{API_BASE_URL}/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {'Content-Type': 'application/json'}
 
-    # Corpo da requisiÃ§Ã£o
+    # Corpo da requisição
     body = {
         "serviceName": "MobileLoginSP.login",
         "requestBody": {
-            "NOMUSU": {"$": "IRANILDO"},
-            "INTERNO": {"$": "123456"},
+            "NOMUSU": {"$": NOMUSU},
+            "INTERNO": {"$": INTERNO},
             "KEEPCONNECTED": {"$": "S"}
         }
     }
 
-    # Fazendo a requisiÃ§Ã£o
+    # Fazendo a requisição
     response = requests.post(url, json=body, headers=headers)
     
     # Obtendo o jsessionid da resposta
     jsessionid = response.json().get('responseBody', {}).get('jsessionid', {}).get('$', '')
 
     # Realizando o segundo POST
-    url_post = f"http://179.185.45.146:8280/mgeprod/service.sbr?serviceName=OperacaoProducaoSP.confirmarApontamento&application=OperacaoProducao&mgeSession={jsessionid}&resourceID=br.com.sankhya.producao.cad.OperacaoProducao"
+    url_post = f"{API_BASE_URL}/mgeprod/service.sbr?serviceName=OperacaoProducaoSP.confirmarApontamento&application=OperacaoProducao&mgeSession={jsessionid}&resourceID=br.com.sankhya.producao.cad.OperacaoProducao"
 
-    # Corpo da segunda requisiÃ§Ã£o com o parÃ¢metro da URL
+    # Corpo da segunda requisição com o parâmetro da URL
     body_post = f"""
         <serviceRequest serviceName="mgeprod@OperacaoProducaoSP.confirmarApontamento">
             <requestBody>
@@ -1268,42 +1326,42 @@ def post_confirmarapontamento():
     # Fazendo o segundo POST
     response_post = requests.post(url_post, data=body_post, headers={'Content-Type': 'application/xml'})
 
-    # Extraindo informaÃ§Ãµes do XML retornado
+    # Extraindo informações do XML retornado
     info_from_xml = extract_info_from_xml(response_post.text)
 
     return jsonify(info_from_xml)
 
 @app.route('/post_salvarapontamento2', methods=['GET'])
 def post_salvarapontamento2():
-    # Obtendo o parÃ¢metro da URL para a tag IDIATV
+    # Obtendo o parâmetro da URL para a tag IDIATV
     #qnt_param = request.args.get('qnt')
     #nuapo_param = request.args.get('nuapo')
     #seqapa_param = request.args.get('seqapa')
 
-    url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
+    url = f"{API_BASE_URL}/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {'Content-Type': 'application/json'}
 
-    # Corpo da requisiÃ§Ã£o
+    # Corpo da requisição
     body = {
         "serviceName": "MobileLoginSP.login",
         "requestBody": {
-            "NOMUSU": {"$": "IRANILDO"},
-            "INTERNO": {"$": "123456"},
+            "NOMUSU": {"$": NOMUSU},
+            "INTERNO": {"$": INTERNO},
             "KEEPCONNECTED": {"$": "S"}
         }
     }
 
-    # Fazendo a requisiÃ§Ã£o
+    # Fazendo a requisição
     response = requests.post(url, json=body, headers=headers)
     
     # Obtendo o jsessionid da resposta
     jsessionid = response.json().get('responseBody', {}).get('jsessionid', {}).get('$', '')
     print(jsessionid)
     # Realizando o segundo POST
-    #url_post = f"http://179.185.45.146:8280/mge/service.sbr?serviceName=CRUDServiceProvider.saveRecord&application=OperacaoProducao&resourceID=br.com.sankhya.producao.cad.OperacaoProducao&mgeSession={jsessionid}"
-    url_post = f"http://179.185.45.146:8280/mge/service.sbr?serviceName=CRUDServiceProvider.saveRecord&application=OperacaoProducao&resourceID=br.com.sankhya.producao.cad.OperacaoProducao&mgeSession={jsessionid}"
+    #url_post = f"{API_BASE_URL}/mge/service.sbr?serviceName=CRUDServiceProvider.saveRecord&application=OperacaoProducao&resourceID=br.com.sankhya.producao.cad.OperacaoProducao&mgeSession={jsessionid}"
+    url_post = f"{API_BASE_URL}/mge/service.sbr?serviceName=CRUDServiceProvider.saveRecord&application=OperacaoProducao&resourceID=br.com.sankhya.producao.cad.OperacaoProducao&mgeSession={jsessionid}"
     print(url_post)
-    # Corpo da segunda requisiÃ§Ã£o com o parÃ¢metro da URL
+    # Corpo da segunda requisição com o parâmetro da URL
     body_post = f'''
     <serviceRequest serviceName=\"CRUDServiceProvider.saveRecord\" ><requestBody>\r\n    <dataSet rootEntity=\"ApontamentoPA\" includePresentationFields=\"S\" datasetid=\"1658322435343_10\">\r\n    <entity path=\"\"><fieldset list=\"*\"/><field name=\"CONTROLEPA\"/></entity>\r\n    <entity path=\"Produto\"><fieldset list=\"DECQTD,TIPCONTEST\"/></entity>\r\n    <entity path=\"MotivosPerda\"><field name=\"DESCRICAO\"/></entity>\r\n        <dataRow>\r\n            <localFields>\r\n                <QTDAPONTADA>10</QTDAPONTADA>\r\n            </localFields>\r\n            <key>\r\n                <NUAPO>92959</NUAPO>\r\n                <SEQAPA>1</SEQAPA>\r\n            </key>\r\n        </dataRow>\r\n    </dataSet>\r\n        </requestBody></serviceRequest>
     '''
@@ -1312,25 +1370,25 @@ def post_salvarapontamento2():
     # Fazendo o segundo POST
     response_post = requests.post(url_post, data=body_post, headers={'Content-Type': 'application/xml'})
 
-    # Extraindo informaÃ§Ãµes do XML retornado
+    # Extraindo informações do XML retornado
     info_from_xml = extract_info_from_xml(response_post.text)
 
     return jsonify(info_from_xml)
 
 @app.route('/post_salvarapontamento', methods=['GET'])
 def post_salvarapontamento():
-    # ConfiguraÃ§Ã£o da primeira solicitaÃ§Ã£o HTTP
+    # Configuração da primeira solicitação HTTP
     qnt_param = request.args.get('qnt')
     nuapo_param = request.args.get('nuapo')
     seqapa_param = request.args.get('seqapa')
     
-    login_url = "http://179.185.45.146:8280/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
+    login_url = f"{API_BASE_URL}/mge/service.sbr?serviceName=MobileLoginSP.login&outputType=json"
     headers = {"Content-Type": "application/json"}
     payload = {
         "serviceName": "MobileLoginSP.login",
         "requestBody": {
-            "NOMUSU": { "$": "IRANILDO" },
-            "INTERNO": { "$": "123456" },
+            "NOMUSU": { "$": NOMUSU },
+            "INTERNO": { "$": INTERNO },
             "KEEPCONNECTED": { "$": "S" }
         }
     }
@@ -1348,8 +1406,8 @@ def post_salvarapontamento():
         print(jsessionid)
         print(jsessionid2)
 
-        # ConfiguraÃ§Ã£o da segunda solicitaÃ§Ã£o usando o cookie da primeira API
-        segunda_api_url = f"http://179.185.45.146:8280/mge/service.sbr?serviceName=CRUDServiceProvider.saveRecord&application=OperacaoProducao&resourceID=br.com.sankhya.producao.cad.OperacaoProducao&mgeSession={jsessionid2}"
+        # Configuração da segunda solicitação usando o cookie da primeira API
+        segunda_api_url = f"{API_BASE_URL}/mge/service.sbr?serviceName=CRUDServiceProvider.saveRecord&application=OperacaoProducao&resourceID=br.com.sankhya.producao.cad.OperacaoProducao&mgeSession={jsessionid2}"
         segunda_api_headers = {
             "Content-Type": "application/json",
             "Cookie": jsessionid
