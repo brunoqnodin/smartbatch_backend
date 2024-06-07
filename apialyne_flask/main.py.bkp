@@ -1,0 +1,241 @@
+import cursor as cursor
+import pymysql
+from app import app
+from db_config import mysql
+from flask import jsonify
+from flask import flash, request
+from werkzeug.security import generate_password_hash, check_password_hash
+import random
+
+@app.route('/getFunc')
+def getFunc():
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        cursor.execute("SELECT id, codigo, nome, cargo FROM funcionarios")
+        rows = cursor.fetchall()
+        resp = jsonify(rows)
+        resp.status_code = 200
+        return resp
+    except Exception as e:
+        print(e)
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route('/brindes')
+def getBrindes():
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        cursor.execute("SELECT * FROM brindes")
+        rows = cursor.fetchall()
+        resp = jsonify(rows)
+        resp.status_code = 200
+        return resp
+    except Exception as e:
+        print(e)
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@app.route('/sortear', methods=['POST'])
+def sortear_brinde():
+    cur = mysql.connection.cursor()
+    cur.execute('SELECT * FROM brindes WHERE quantidade_disponivel > 0')
+    brindes_disponiveis = cur.fetchall()
+    
+    if not brindes_disponiveis:
+        return jsonify({'message': 'Nenhum brinde disponível para sorteio'})
+
+    brinde_sorteado = random.choice(brindes_disponiveis)
+    cur.execute('UPDATE brindes SET quantidade_disponivel = quantidade_disponivel - 1 WHERE id = %s', (brinde_sorteado['id'],))
+    mysql.connection.commit()
+    cur.close()
+    
+    return jsonify(brinde_sorteado)
+
+@app.route('/getIST')
+def getColetor():
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        cursor.execute("SELECT * FROM coletor_senai")
+        rows = cursor.fetchall()
+        resp = jsonify(rows)
+        resp.status_code = 200
+        return resp
+    except Exception as e:
+        print(e)
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route('/getIST2')
+def getColetor2():
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        cursor.execute("SELECT * FROM coletor_senai2")
+        rows = cursor.fetchall()
+        resp = jsonify(rows)
+        resp.status_code = 200
+        return resp
+    except Exception as e:
+        print(e)
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route('/getIST3')
+def getColetor3():
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        cursor.execute("SELECT * FROM auto_senai")
+        rows = cursor.fetchall()
+        resp = jsonify(rows)
+        resp.status_code = 200
+        return resp
+    except Exception as e:
+        print(e)
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@app.route('/postIST2', methods=['POST'])
+def post2():
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        json_data = request.get_json(force=True)
+        _mac = json_data['mac']
+        _di0 = json_data['di0']
+        _di1 = json_data['di1']
+        _di2 = json_data['di2']
+        _di3 = json_data['di3']
+        _di4 = json_data['di4']
+        _di5 = json_data['di5']
+        _di6 = json_data['di6']
+        _di7 = json_data['di7']
+        _data = json_data['data']
+        insert_user_cmd = """INSERT INTO coletor_senai2 (mac, di0, di1, di2, di3, di4, di5, di6, di7, data) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+        cursor.execute(insert_user_cmd, (_mac, _di0, _di1, _di2, _di3, _di4, _di5, _di6, _di7, _data))
+        conn.commit()
+        response = jsonify(message='Valor Inserido com Sucesso', id=cursor.lastrowid)
+        # response.data = cursor.lastrowid
+        response.status_code = 200
+    except Exception as e:
+        print(e)
+        response = jsonify('Erro Brabissimo Senai')
+        response.status_code = 400
+    finally:
+        cursor.close()
+        conn.close()
+        return (response)
+
+@app.route('/postIST3', methods=['POST'])
+def post3():
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        json_data = request.get_json(force=True)
+        _mac = json_data['mac']
+        _di0 = json_data['di0']
+        _di1 = json_data['di1']
+        _di2 = json_data['di2']
+        _di3 = json_data['di3']
+        _peso = json_data['peso']
+        _temperatura = json_data['temperatura']
+        _corrente1 = json_data['corrente1']
+        _corrente2 = json_data['corrente2']
+        _corrente3 = json_data['corrente3']
+        _tim = json_data['tim']
+        insert_user_cmd = """INSERT INTO auto_senai (mac, di0, di1, di2, di3, peso, temperatura, corrente1, corrente2, corrente3, tim) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+        cursor.execute(insert_user_cmd, (_mac, _di0, _di1, _di2, _di3, _peso, _temperatura, _corrente1, _corrente2, _corrente3, _tim))
+        conn.commit()
+        response = jsonify(message='Valor Inserido com Sucesso', id=cursor.lastrowid)
+        # response.data = cursor.lastrowid
+        response.status_code = 200
+    except Exception as e:
+        print(e)
+        response = jsonify('Erro Brabissimo Senai')
+        response.status_code = 400
+    finally:
+        cursor.close()
+        conn.close()
+        return (response)
+
+@app.route('/postIST', methods=['POST'])
+def post():
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        json_data = request.get_json(force=True)
+        _mac = json_data['mac']
+        _identificador = json_data['identificador']
+        _valor = json_data['valor']
+        _data = json_data['data']
+        insert_user_cmd = """INSERT INTO coletor_senai (mac, identificador, valor, data) VALUES (%s, %s, %s, %s)"""
+        cursor.execute(insert_user_cmd, (_mac, _identificador, _valor, _data))
+        conn.commit()
+        response = jsonify(message='Valor Inserido com Sucesso', id=cursor.lastrowid)
+        # response.data = cursor.lastrowid
+        response.status_code = 200
+    except Exception as e:
+        print(e)
+        response = jsonify('Erro Brabissimo Senai')
+        response.status_code = 400
+    finally:
+        cursor.close()
+        conn.close()
+        return (response)
+
+@app.route('/sintetico_data/<string:data>')
+def user(data):
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        cursor.execute("SELECT id as id_smartgears, linha_turno as centro_de_trabalho, cod_produto, descricao_produto, turno, programado_linha as programado, cod_ordem as cod_ordem_sap, refugo, IF(status = 2, ((((hist+valor_temp)*multiplos)+manual)-refugo), ((((hist)*multiplos)+manual)-refugo)) as produzido, data_inicio as data FROM view_total_hist WHERE empresa = '00153282000167' AND data_inicio = %s ORDER BY data_inicio DESC, linha_turno ASC", data)
+        row = cursor.fetchone()
+        resp = jsonify(row)
+        resp.status_code = 200
+        return resp
+    except Exception as e:
+        print(e)
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route('/detalhe/<string:data>')
+def detalhe(data):
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        cursor.execute("SELECT `view_total_hist`.`id` AS `id`, `view_total_hist`.`cod_ordem` AS `cod_ordem`, `view_total_hist`.`id_linha` AS `id_linha`, `view_total_hist`.`linha_turno` AS `linha_turno`, `view_total_hist`.`cod_produto` AS `cod_produto`, `view_total_hist`.`descricao_produto` AS `desc_produto`, `view_total_hist`.`programado_linha` AS `meta_hora`, round(`view_total_hist`.`programado_linha` * 7.33,0) AS `meta_total`, `view_total_hist`.`valor_temp` AS `valor_temp`, `view_total_hist`.`manual` AS `manual`, `view_total_hist`.`refugo` AS `refugo`, (SELECT tipo FROM status_ordem WHERE id = `view_total_hist`.`status`) as `status`, `view_total_hist`.`empresa` AS `empresa`, ((`view_total_hist`.`valor_temp` + `view_total_hist`.`manual`) * `view_total_hist`.`multiplos` - `view_total_hist`.`refugo`) as total, IF((timestampdiff(HOUR,(select `mudanca_status_meta`.`data` from `mudanca_status_meta` where `mudanca_status_meta`.`id_meta` = `view_total_hist`.`id` and `mudanca_status_meta`.`id_status` = 2 order by `mudanca_status_meta`.`id` limit 1),current_timestamp())) = 0 ,1, (timestampdiff(HOUR,(select `mudanca_status_meta`.`data` from `mudanca_status_meta` where `mudanca_status_meta`.`id_meta` = `view_total_hist`.`id` and `mudanca_status_meta`.`id_status` = 2 order by `mudanca_status_meta`.`id` limit 1),current_timestamp()))) as fer, (((`view_total_hist`.`valor_temp` + `view_total_hist`.`manual`) * `view_total_hist`.`multiplos` - `view_total_hist`.`refugo`)/(if(current_timestamp() > concat(`view_total_hist`.`data_final`,' ',(select `cad_turno`.`hora_fim` from `cad_turno` where `cad_turno`.`turno` = `view_total_hist`.`turno` and `cad_turno`.`empresa` = `view_total_hist`.`empresa`)),round(`view_total_hist`.`programado_linha` * 7.33,0),round(`view_total_hist`.`programado_linha` * IF((timestampdiff(HOUR,(select `mudanca_status_meta`.`data` from `mudanca_status_meta` where `mudanca_status_meta`.`id_meta` = `view_total_hist`.`id` and `mudanca_status_meta`.`id_status` = 2 order by `mudanca_status_meta`.`id` limit 1),current_timestamp())) = 0 ,1, (timestampdiff(HOUR,(select `mudanca_status_meta`.`data` from `mudanca_status_meta` where `mudanca_status_meta`.`id_meta` = `view_total_hist`.`id` and `mudanca_status_meta`.`id_status` = 2 order by `mudanca_status_meta`.`id` limit 1),current_timestamp()))),0))))as performance, IFNULL((if(`view_total_hist`.`valor_temp` + `view_total_hist`.`manual` + `view_total_hist`.`hist` - `view_total_hist`.`refugo` = 0,(`view_total_hist`.`valor_temp` + `view_total_hist`.`manual` + `view_total_hist`.`hist` - `view_total_hist`.`refugo`) / 1 * 100,(`view_total_hist`.`valor_temp` + `view_total_hist`.`manual` + `view_total_hist`.`hist` - `view_total_hist`.`refugo`) / (`view_total_hist`.`valor_temp` + `view_total_hist`.`manual` + `view_total_hist`.`hist`))),0) AS `qualidade`, 1 as disponibilidade from `view_total_hist` WHERE (`view_total_hist`.`data_inicio` = CURRENT_DATE() OR `view_total_hist`.`data_final` = CURRENT_DATE()) AND id_linha = %s AND `view_total_hist`.`status` = 2 ORDER BY hora_inicio DESC LIMIT 1", data)
+        row = cursor.fetchone()
+        resp = jsonify(row)
+        resp.status_code = 200
+        return resp
+    except Exception as e:
+        print(e)
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@app.errorhandler(404)
+def not_found(error=None):
+    message = {
+        'status': 404,
+        'message': 'Not Found: ' + request.url,
+    }
+    resp = jsonify(message)
+    resp.status_code = 404
+    return resp
+
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0')
